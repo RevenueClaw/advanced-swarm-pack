@@ -67,6 +67,13 @@ The **Advanced Swarm Pack** transforms OpenClaw from a single-agent assistant in
 - Cost dashboards (daily/monthly)
 - Version promotion logs
 
+### 🏗️ Architect-First Planning (NEW)
+- **Mandatory self-critique** before execution
+- **5-dimensional plan scoring** (clarity, risk, completeness, feasibility, testability)
+- **Rollback planning** as first-class citizen
+- **Smart escalation** when plans are weak or uncertain
+- **80/20 discipline**: Plan extensively, execute confidently
+
 ---
 
 ## Hardware Requirements
@@ -152,6 +159,58 @@ advanced-swarm-pack/
 - [Versioning Guide](docs/versioning.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Contributing](docs/contributing.md)
+
+---
+
+## The Architect-First Philosophy
+
+This pack implements **Architect-First Planning** — a discipline borrowed from high-quality engineering workflows.
+
+### The 80/20 Rule
+
+Spend **~80%** of effort understanding and planning before committing to the **~20%** of execution. Counterintuitive, but it works:
+
+- Problems caught in planning cost $1 to fix
+- Problems caught in execution cost $10 to fix
+- Problems caught in production cost $100 to fix
+
+### How It Works
+
+**1. Self-Critique Before Execution**
+Every substantial plan gets reviewed by the `PlanReviewer`:
+- Scores clarity, risk, completeness, feasibility, testability
+- Identifies gaps before they become blockers
+- Generates acceptance criteria upfront (when it's cheap to think about)
+
+**2. Mandatory Rollback Thinking**
+Before starting, answer: "What if this fails halfway through?"
+- Triggers defined (when to abort)
+- Steps documented (how to revert)
+- Time estimated (rollback cost)
+
+**3. Tiered Planning Modes**
+
+| Mode | Trigger | Review Required? |
+|------|---------|-----------------|
+| **Fast** | <2 subtasks, low risk | Optional |
+| **Standard** | Normal complexity | Yes, auto-approve if score >70 |
+| **Architect-First** | Complex/novel/high-risk | Mandatory, escalate if <70 |
+
+**4. Smart Escalation**
+When a plan scores poorly or confidence is low, the swarm automatically:
+- Flags for human review
+- Explains specific concerns
+- Suggests fixes
+- Never proceeds blindly
+
+### Benefits
+
+- **Fewer surprises:** Problems caught when they're cheap
+- **Clearer thinking:** Forced articulation catches logical gaps
+- **Safer recovery:** Rollback plans mean failed experiments don't become disasters
+- **Better outcomes:** Acceptance criteria defined upfront, not guessed later
+
+This isn't overhead — it's how you go fast *without* breaking things.
 
 ---
 
