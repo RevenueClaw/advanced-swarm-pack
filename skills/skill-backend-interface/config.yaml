@@ -1,0 +1,53 @@
+# Backend Interface Configuration
+# Updated: 2026-05-24
+
+backends:
+  openrouter:
+    enabled: true
+    priority: 1
+    api_key: ${OPENROUTER_API_KEY}
+    default_model: "openrouter/moonshotai/kimi-k2.5"
+    timeout_seconds: 60
+    max_retries: 3
+
+  ollama:
+    enabled: true
+    priority: 2
+    default_endpoint: "http://192.168.4.108:11434"
+    default_model: "llama3.2:3b"
+    available_models:
+      - llama3.2:3b
+      - mistral:7b
+    timeout_seconds: 120
+    max_retries: 2
+
+  local_rock:
+    enabled: false
+    endpoint: "http://localhost:11434"
+
+# Routing Configuration
+routing:
+  # When to use Ollama vs OpenRouter
+  ollama_fallback_threshold: 80  # % of daily budget before Ollama becomes primary
+  heavy_task_threshold: 1000     # tokens - route heavy load to GPU
+  force_local_for:
+    - simple_queries
+    - code_completion
+    - testing
+
+# Cost Tracking  
+cost_tracking:
+  enabled: true
+  daily_budget: 5.00
+  monthly_budget: 100.00
+
+nodes:
+  omen_gpu:
+    ip: "192.168.4.108"
+    ollama_port: 11434
+    available: true
+    default_model: "llama3.2:3b"
+    capabilities:
+      - cuda_inference
+      - local_llm
+      - high_volume
