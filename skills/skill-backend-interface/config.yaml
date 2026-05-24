@@ -14,10 +14,32 @@ backends:
     enabled: true
     priority: 2
     default_endpoint: "http://192.168.4.108:11434"
-    default_model: "llama3.2:3b"
+    # Model routing based on task type
+    default_model: "mistral:7b"              # Heavy reasoning, general tasks
+    vision_model: "llava:7b"                 # Vision/multimodal tasks
+    fast_model: "llama3.2:3b"                # Quick responses, simple tasks
+    
     available_models:
-      - llama3.2:3b
+      # Heavy reasoning (default)
       - mistral:7b
+      - llama3.2:3b
+      
+      # Vision tasks
+      - llava:7b
+      - moondream:latest
+      
+      # Specialized
+      - phi4:14b-q4_K_M
+      - nomic-embed-text:latest
+      - snowflake-arctic-embed2:latest
+      - smollm2:360m
+      - llama3.1:latest
+      - moondream2:latest
+      - qwen2.5:latest
+      - granite3.1-moe:3b
+      - llama3.2:latest
+      - smollm:latest
+      - granite3.1-moe:latest
     timeout_seconds: 120
     max_retries: 2
 
@@ -30,10 +52,20 @@ routing:
   # When to use Ollama vs OpenRouter
   ollama_fallback_threshold: 80  # % of daily budget before Ollama becomes primary
   heavy_task_threshold: 1000     # tokens - route heavy load to GPU
+  
+  # Model selection based on task type
+  model_selection:
+    heavy_reasoning: "mistral:7b"      # Complex analysis, planning
+    fast_response: "llama3.2:3b"       # Quick queries, simple tasks
+    vision: "llava:7b"                   # Image analysis, multimodal
+    code: "mistral:7b"                   # Code generation, review
+    embedding: "nomic-embed-text:latest"
+  
   force_local_for:
     - simple_queries
     - code_completion
     - testing
+    - vision_analysis
 
 # Cost Tracking  
 cost_tracking:

@@ -216,6 +216,123 @@ This isn't overhead — it's how you go fast *without* breaking things.
 
 ---
 
+## Architect-First Planning System
+
+The Advanced Swarm Pack includes a complete planning discipline for high-stakes work.
+
+### Plan Review Engine
+
+Every substantial task gets automatically reviewed before execution:
+
+```python
+from skill_architect_first import PlanReviewer
+
+reviewer = PlanReviewer()
+reviewed = reviewer.review({
+    "goal": "Implement feature X",
+    "steps": ["Step 1", "Step 2", "Step 3"],
+    "risks": ["Risk A", "Risk B"],
+    "success_criteria": ["Criterion 1", "Criterion 2"]
+})
+
+# Reviewed plan includes:
+# - 5-dimensional score (clarity, risk, completeness, feasibility, testability)
+# - Specific critiques with severity levels
+# - Generated acceptance criteria
+# - Rollback plan with triggers and steps
+# - Proceed/don't proceed recommendation
+```
+
+### Intelligent Mode Selection
+
+The system automatically selects the right planning depth:
+
+**FAST Mode**: Simple, low-risk tasks
+- Examples: Fix typo, update config, simple query
+- Planning time: 2-3 minutes
+- Can skip detailed review
+
+**STANDARD Mode**: Normal complexity work
+- Examples: Refactor module, add feature, update dependencies
+- Planning time: 5-10 minutes
+- Review required, auto-approve if score ≥70
+
+**ARCHITECT-FIRST Mode**: Complex or high-risk assignments
+- Examples: Database migration, architectural changes, new integrations
+- Planning time: 15-30 minutes
+- Mandatory deep review, escalation on weak plans
+
+### HITL Integration
+
+Plans that score poorly automatically escalate to human review:
+
+- **Score < 60/100** → Escalate to human
+- **2+ critical issues** → Escalate to human
+- **Execution confidence < 50%** → Escalate to human
+
+### Example Workflow
+
+```
+Task: "Migrate production database"
+↓
+Analysis: 8 subtasks, HIGH risk, novel
+↓
+Selected Mode: ARCHITECT-FIRST
+↓
+Plan Review: Score 87/100
+  ✓ 5 dimensions analyzed
+  ✓ 2 critiques addressed
+  ✓ Acceptance criteria generated
+  ✓ Rollback plan documented
+↓
+Escalation Check: Not needed (score >60)
+↓
+Proceed with execution
+  ↓ Success: Accept results
+  ↓ Failure: Execute rollback plan
+```
+
+### Versioning & Learning
+
+Plans are versioned like skills:
+- Score 90+ → v1.0.x (production-ready)
+- Score 70-89 → v0.1.x (acceptable)
+- Score <70 → v0.0.x (needs revision)
+
+User planning preferences are learned over time:
+- Tracks successful vs. failed plans by mode
+- Learns if user prefers more or less planning overhead
+- Adapts default modes based on history
+
+### Backend Router: Ollama GPU Node
+
+The **Omen GPU node** (192.168.4.108:11434) is now active with Ollama:
+
+**Available Models:**
+- `mistral:7b` — Default for heavy reasoning, complex analysis
+- `llama3.2:3b` — Fast responses, simple tasks
+- `llava:7b` — Vision/multimodal tasks
+- `moondream:latest` — Lightweight vision
+- Plus 10+ more specialized models
+
+**Automatic Routing:**
+- Heavy reasoning → Mistral on Omen GPU
+- Vision tasks → LLaVA on Omen GPU
+- Budget exceeded → Fallback to Ollama
+- Simple queries → llama3.2:3b for speed
+
+**Configuration:**
+```yaml
+backends:
+  ollama:
+    endpoint: http://192.168.4.108:11434
+    default_model: mistral:7b
+    vision_model: llava:7b
+    fast_model: llama3.2:3b
+```
+
+---
+
 ## Monetization & Support
 
 **The core Advanced Swarm Pack is and will always be completely free and open source.**
@@ -277,7 +394,7 @@ You benefit from that same discipline.
 **Discussions:** [GitHub Discussions](https://github.com/RevenueClaw/advanced-swarm-pack/discussions)
 
 **Current Priorities:**
-- [ ] GPU node Ollama integration (testing phase)
+- [x] GPU node Ollama integration ✅ LIVE on Omen (192.168.4.108:11434) with Mistral/LLaVA
 - [ ] Pro skill template marketplace
 - [ ] Web dashboard for swarm health
 - [ ] Integration tests for multi-node scenarios
