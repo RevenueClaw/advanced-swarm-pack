@@ -1,0 +1,132 @@
+# Swarm Configuration Example
+# Copy to ~/.openclaw/swarm-config.yaml and customize
+
+swarm:
+  name: "my-production-swarm"
+  description: "3-node setup for production automation"
+  leader_node: "rock-5b-leader"
+  version: "1.0.0-alpha"
+
+# Node definitions
+nodes:
+  - name: "rock-5b-leader"
+    ip: "192.168.1.100"
+    role: "leader"
+    specs:
+      ram_gb: 32
+      storage_gb: 500
+      arch: "arm64"
+    capabilities: 
+      - orchestration
+      - heavy_context
+      - long_term_memory
+      - preference_learning
+    health_check_interval: 1800  # 30 minutes
+    
+  - name: "omen-gpu"
+    ip: "192.168.1.101"
+    role: "worker"
+    specs:
+      ram_gb: 16
+      storage_gb: 1000
+      gpu: "RTX 3060"
+      arch: "x86_64"
+    capabilities:
+      - cuda_inference
+      - embeddings
+      - ollama
+      - heavy_compute
+    max_concurrent_tasks: 4
+    
+  - name: "pi-5-light"
+    ip: "192.168.1.102"
+    role: "worker"
+    specs:
+      ram_gb: 8
+      storage_gb: 256
+      arch: "arm64"
+    capabilities:
+      - light_scripts
+      - monitoring
+      - health_checks
+    max_concurrent_tasks: 8
+
+# Backend configuration
+backends:
+  openrouter:
+    enabled: true
+    api_key: ${OPENROUTER_API_KEY}
+    default_model: "openrouter/moonshotai/kimi-k2.5"
+    fallback_models:
+      - "openrouter/moonshotai/kimi-k2.5"
+      - "openrouter/openai/gpt-4o"
+    timeout_seconds: 60
+    max_retries: 3
+    
+  ollama:
+    enabled: true
+    endpoint: "http://192.168.1.101:11434"
+    default_model: "llama3:8b"
+    fallback_model: "phi3:medium"
+    timeout_seconds: 120
+
+# Cost management
+cost_management:
+  daily_budget_usd: 5.00
+  monthly_budget_usd: 100.00
+  fallback_threshold: 80  # % of budget before switching to local
+  alert_channels: ["webchat", "email"]  # Adjust to your setup
+  
+# Versioning settings
+versioning:
+  registry_path: "~/.openclaw/skills/skill-versioning/registry/"
+  shadow_results_path: "~/.openclaw/skills/skill-versioning/shadow_results/"
+  min_shadow_runs: 50
+  acceptance_threshold: 0.90
+  auto_promote: false  # Manual promotion required
+
+# Preference learning
+preference_learning:
+  user_id: "shayne"
+  storage_path: "~/.openclaw/skills/skill-preference-learning/preferences/"
+  confidence_decay_days: 30
+  min_confidence_for_application: 0.4
+  feedback_patterns_enabled: true
+
+# Consensus/debate
+consensus:
+  enabled: true
+  risk_threshold: 0.6
+  min_confidence: 0.7
+  personas:
+    - conservative
+    - pragmatic
+    - innovative
+  debate_timeout_seconds: 300
+
+# Health monitoring
+health:
+  enabled: true
+  check_interval_minutes: 30
+  session_warning_threshold: 200
+  session_critical_threshold: 500
+  auto_cleanup_orphaned: true
+  orphaned_age_days: 7
+
+# Logging
+logging:
+  level: "INFO"
+  file: "~/.openclaw/logs/swarm.log"
+  max_size_mb: 100
+  retention_days: 30
+  
+# Notifications
+notifications:
+  enabled: true
+  channels:
+    webchat:
+      target: "shayne"
+    email:
+      smtp_server: "smtp.example.com"
+      to: "admin@example.com"
+      from: "swarm@example.com"
