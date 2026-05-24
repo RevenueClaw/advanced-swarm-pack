@@ -15,7 +15,7 @@ The **Advanced Swarm Pack** transforms OpenClaw from a capable single-agent assi
 
 Built from the ground up on a **Radxa Rock 5B** (32GB RAM) with a simple mandate: *must run 24/7 without manual intervention.*
 
-**10 production-ready skills. 8,500+ lines of code. Battle-tested.**
+**11 production-ready skills. 9,300+ lines of code. Battle-tested.**
 
 ---
 
@@ -31,7 +31,7 @@ This release represents a significant leap forward in multi-agent reliability an
 | **🖥️ Optional GPU Node** | "OpenRouter costs spiraling" | Local Ollama fallback on any NVIDIA GPU |
 | **📧 Newsletter Processor** | "Missing business opportunities" | Auto-extract ideas from emails |
 
-**Plus 5 battle-tested foundational skills** for orchestration, learning, consensus, cost management, versioning, and visualization.
+**Plus 6 battle-tested foundational skills** for orchestration, learning, consensus, cost management, versioning, visualization, and opportunity tracking.
 
 ---
 
@@ -112,6 +112,32 @@ This release represents a significant leap forward in multi-agent reliability an
 - Extracts business ideas from Side Hustle Nation emails
 - Auto-cron every 2 days at 7:00 AM EDT
 
+### 💡 Income & Opportunity (NEW in v1.0.1)
+
+**skill-idea-tracker** — Turn newsletters and emails into prioritized, trackable business opportunities.
+
+This skill goes beyond simple extraction. It intelligently scores ideas, automatically creates tasks for high-value ones, maintains a clean backlog, and delivers weekly digests of the best opportunities.
+
+**Key Features:**
+- 5D scoring system (Revenue Potential, Effort, AI Relevance, Strategic Fit, etc.)
+- Automatic P0–P3 task creation for high-scoring ideas
+- Smart duplicate detection and outcome tracking
+- Weekly digest emails summarizing top opportunities
+- Deep integration with Architect-First planning and Estimation Engine
+
+**Perfect for:**
+- Side hustle / income idea discovery
+- Business development and opportunity management
+- Turning passive newsletter reading into active execution
+
+**Example Output:**
+```
+🚨 NEW HIGH-VALUE OPPORTUNITY
+AI Automation Agency Model — $20K+/mo potential (P0)
+Score: 74/100 | Effort: Medium | Strategic Fit: Excellent
+→ Task automatically created
+```
+
 ### 📊 Bonus: Visualization
 
 **skill-visual-reports** — On-demand dashboards.
@@ -131,7 +157,7 @@ npm install -g openclaw
 git clone https://github.com/RevenueClaw/advanced-swarm-pack.git
 cd advanced-swarm-pack
 
-# 3. Install all 10 skills
+# 3. Install all 11 skills
 ./scripts/install-skills.sh
 
 # 4. Configure your swarm
