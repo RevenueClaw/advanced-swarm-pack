@@ -1,21 +1,24 @@
 # Swarm Configuration Example
-# Copy to ~/.openclaw/swarm-config.yaml and customize
+# Copy to ~/.openclaw/swarm-config.yaml and customize with YOUR values
+# 
+# IMPORTANT: Replace ALL placeholder values (YOUR_*) with your actual configuration
 
 swarm:
-  name: "my-production-swarm"
-  description: "3-node setup for production automation"
-  leader_node: "rock-5b-leader"
-  version: "1.0.0-alpha"
+  name: "my-swarm"  # CHANGEME: Your swarm name
+  description: "Production automation swarm"  # CHANGEME: Your description
+  leader_node: "your-leader"  # CHANGEME: Your leader node name
+  version: "1.0.0"
 
-# Node definitions
+# Node definitions - REPLACE ALL VALUES BELOW
 nodes:
-  - name: "rock-5b-leader"
-    ip: "192.168.1.100"
+  # Leader Node (typically your highest-spec machine)
+  - name: "your-leader-name"  # e.g., "rock-5b", "desktop", "server"
+    ip: "YOUR_LEADER_IP"  # CHANGEME: e.g., "192.168.1.10" or "127.0.0.1" if local only
     role: "leader"
     specs:
-      ram_gb: 32
-      storage_gb: 500
-      arch: "arm64"
+      ram_gb: 32  # CHANGEME: Your RAM
+      storage_gb: 500  # CHANGEME: Your storage
+      arch: "arm64"  # CHANGEME: arm64 or x86_64
     capabilities: 
       - orchestration
       - heavy_context
@@ -23,28 +26,32 @@ nodes:
       - preference_learning
     health_check_interval: 1800  # 30 minutes
     
-  - name: "omen-gpu"
-    ip: "192.168.1.101"
+  # GPU Worker Node (for local LLM inference)
+  # OPTIONAL: Can use OpenRouter only if you don't have GPU
+  - name: "your-gpu-node-name"  # CHANGEME: e.g., "omen", "workstation"
+    ip: "YOUR_GPU_NODE_IP"  # CHANGEME: e.g., "192.168.1.20" or "10.0.0.5"
     role: "worker"
     specs:
-      ram_gb: 16
-      storage_gb: 1000
-      gpu: "RTX 3060"
-      arch: "x86_64"
+      ram_gb: 16  # CHANGEME: GPU node RAM
+      storage_gb: 1000  # CHANGEME: GPU node storage
+      gpu: "RTX 3060"  # CHANGEME: Your GPU model (or remove if CPU-only)
+      arch: "x86_64"  # CHANGEME: arm64 or x86_64
     capabilities:
-      - cuda_inference
+      - cuda_inference  # Remove if no CUDA GPU
       - embeddings
       - ollama
       - heavy_compute
     max_concurrent_tasks: 4
     
-  - name: "pi-5-light"
-    ip: "192.168.1.102"
+  # Light Worker Node (optional, for lightweight tasks)
+  # OPTIONAL: Can run with just leader + GPU worker
+  - name: "your-pi-node-name"  # CHANGEME: e.g., "raspberry-pi"
+    ip: "YOUR_WORKER_IP"  # CHANGEME: Worker node IP
     role: "worker"
     specs:
-      ram_gb: 8
-      storage_gb: 256
-      arch: "arm64"
+      ram_gb: 8  # CHANGEME: Light worker RAM
+      storage_gb: 256  # CHANGEME: Light worker storage
+      arch: "arm64"  # CHANGEME: architecture
     capabilities:
       - light_scripts
       - monitoring
@@ -55,7 +62,7 @@ nodes:
 backends:
   openrouter:
     enabled: true
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: ${OPENROUTER_API_KEY}  # Set via environment variable
     default_model: "openrouter/moonshotai/kimi-k2.5"
     fallback_models:
       - "openrouter/moonshotai/kimi-k2.5"
@@ -64,30 +71,34 @@ backends:
     max_retries: 3
     
   ollama:
-    enabled: true
-    endpoint: "http://192.168.1.101:11434"
-    default_model: "llama3:8b"
-    fallback_model: "phi3:medium"
+    enabled: true  # Set to false if no local GPU
+    # CHANGEME: Configure for YOUR setup
+    # If Ollama is on the leader node: "http://127.0.0.1:11434"
+    # If Ollama is on a worker node: "http://YOUR_GPU_IP:11434"
+    endpoint: "http://YOUR_GPU_IP:11434"  # Example: "http://192.168.1.20:11434"
+    default_model: "mistral:7b"  # Default for heavy reasoning
+    vision_model: "llava:7b"  # For vision tasks
+    fast_model: "llama3.2:3b"  # For quick responses
     timeout_seconds: 120
 
 # Cost management
 cost_management:
-  daily_budget_usd: 5.00
-  monthly_budget_usd: 100.00
-  fallback_threshold: 80  # % of budget before switching to local
-  alert_channels: ["webchat", "email"]  # Adjust to your setup
-  
+  daily_budget_usd: 5.00  # CHANGEME: Your daily budget
+  monthly_budget_usd: 100.00  # CHANGEME: Your monthly budget
+  fallback_threshold: 80  # % of budget before switching to local Ollama
+  alert_channels: ["webchat"]  # CHANGEME: Your notification channels
+
 # Versioning settings
 versioning:
   registry_path: "~/.openclaw/skills/skill-versioning/registry/"
   shadow_results_path: "~/.openclaw/skills/skill-versioning/shadow_results/"
   min_shadow_runs: 50
   acceptance_threshold: 0.90
-  auto_promote: false  # Manual promotion required
+  auto_promote: false  # Manual promotion recommended for safety
 
-# Preference learning
+# Preference learning - CHANGEME: Set to your username
 preference_learning:
-  user_id: "shayne"
+  user_id: "YOUR_USERNAME"  # e.g., "john", "alice"
   storage_path: "~/.openclaw/skills/skill-preference-learning/preferences/"
   confidence_decay_days: 30
   min_confidence_for_application: 0.4
@@ -120,13 +131,13 @@ logging:
   max_size_mb: 100
   retention_days: 30
   
-# Notifications
+# Notifications - CHANGEME: Configure for your setup
 notifications:
   enabled: true
   channels:
     webchat:
-      target: "shayne"
+      target: "YOUR_USERNAME"  # CHANGEME
     email:
-      smtp_server: "smtp.example.com"
-      to: "admin@example.com"
-      from: "swarm@example.com"
+      smtp_server: "smtp.gmail.com"  # CHANGEME
+      to: "your-email@example.com"  # CHANGEME
+      from: "swarm@yourdomain.com"  # CHANGEME

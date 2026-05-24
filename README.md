@@ -85,7 +85,7 @@ This release represents a significant leap forward in multi-agent reliability an
 - Automatic rerouting on node failure
 
 **skill-backend-interface** — Unified OpenRouter/Ollama API.
-- **Omen GPU Node (NEW)**: 192.168.4.108:11434 — 14 models available
+- **Omen GPU Node (NEW)**: Local GPU with Ollama — 14 models available
 - Default routing: mistral:7b (heavy), llava:7b (vision), llama3.2:3b (fast)
 - Auto-fallback when OpenRouter budget exceeded
 
@@ -108,7 +108,7 @@ This release represents a significant leap forward in multi-agent reliability an
 - Fueled by HITL feedback
 
 **skill-newsletter-processor** — Business opportunity extraction.
-- Monitors AgentMail (RevenueClaw@agentmail.to)
+- Monitors AgentMail (your-inbox@agentmail.to)
 - Extracts business ideas from Side Hustle Nation emails
 - Auto-cron every 2 days at 7:00 AM EDT
 
@@ -182,18 +182,48 @@ if not reviewed.recommend_proceed:
 
 ## 🔧 Hardware Setup
 
-### Reference Deployment (Tested Configuration)
+### Flexible Configuration
 
-| Node | Hardware | Monthly Cost | Purpose |
-|------|----------|--------------|---------|
-| **Rock 5B (Leader)** | 32GB RAM, 500GB NVMe | ~$200 one-time | Orchestration, heavy context, memory |
-| **Omen 17t (GPU)** | 16GB RAM, RTX 3060 | ~$0 (spare PC) | Ollama local LLM, vision, embeddings |
-| **Pi 5 (Worker)** | 8GB RAM, 256GB NVMe | ~$100 one-time | Quick scripts, monitoring |
+The Swarm Pack works with **any hardware mix** — from single-machine setups to multi-node clusters.
 
-**Total**: ~$300-400 one-time for 3-node production swarm.
+### Example: 3-Node Production Swarm (Tested)
 
-### Cloud Alternative
-Any 3 Linux nodes (cloud or on-prem). GPU worker recommended for heavy inference but not required.
+This is what we run in production, but it's just one of many possible configurations:
+
+| Node | Hardware | Purpose | Notes |
+|------|----------|---------|-------|
+| **Leader** | 32GB RAM, 500GB NVMe | Orchestration, heavy context | Any powerful machine (ARM or x86) |
+| **GPU Worker** | 16GB RAM, RTX 3060 | Ollama LLM inference | Optional but recommended |
+| **Light Worker** | 8GB RAM, 256GB NVMe | Quick scripts, monitoring | Raspberry Pi, old laptop, etc. |
+
+**Estimated Cost**: $300-500 for 3-node setup (one-time).
+
+### Other Valid Configurations
+
+- **Single Node**: Run everything on one powerful machine (16GB+ RAM recommended)
+- **2-Node**: Leader + GPU worker (skip light worker)
+- **Cloud**: 3 cloud VMs (DigitalOcean, AWS, etc.) — GPU optional
+- **Mixed**: Local leader + cloud workers, or vice versa
+
+### Minimum Requirements
+
+- **Single node setup**: 8GB RAM, 50GB storage
+- **With GPU**: CUDA-capable GPU for Ollama (optional but saves API costs)
+- **All setups**: Linux (Ubuntu/Debian recommended), Python 3.10+
+
+### Configuration
+
+After installation, edit `~/.openclaw/swarm-config.yaml` with your node IPs:
+
+```yaml
+nodes:
+  - name: "my-leader"
+    ip: "192.168.1.10"  # Your leader node IP
+  - name: "my-gpu"
+    ip: "192.168.1.20"  # Your GPU node IP (if applicable)
+```
+
+See `configs/swarm-example.yaml` for full configuration template.
 
 ---
 
@@ -231,7 +261,7 @@ We're building a sustainable ecosystem:
 Every claim verified or marked experimental:
 
 - ✅ All skills include self-verification (`python skill.py` → tests pass)
-- ✅ Omen GPU node tested and responding (192.168.4.108:11434)
+- ✅ Omen GPU node tested and responding (local GPU endpoint)
 - ✅ End-to-end Architect-First workflow validated
 - ✅ Calculation verified: Python interpreter returns precise results
 - ✅ Estimation calibrated: Historical tracking functional

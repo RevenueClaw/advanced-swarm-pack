@@ -26,63 +26,63 @@ openclaw skill add skills/skill-consensus/
 openclaw skill add skills/skill-resource-awareness/
 ```
 
-## Step 3: Configure Your Swarm
+## Step 3: Configure Your Swarm (IMPORTANT)
 
-Copy the example configuration:
+**This is the most critical step.** The Swarm Pack needs to know about your specific nodes.
+
+### 3.1 Copy Example Configuration
 
 ```bash
 cp configs/swarm-example.yaml ~/.openclaw/swarm-config.yaml
 ```
 
-Edit `~/.openclaw/swarm-config.yaml`:
+### 3.2 Edit with YOUR Values
 
+Open `~/.openclaw/swarm-config.yaml` in your editor and **replace ALL placeholder values (YOUR_*)** with your actual configuration:
+
+**Required Changes:**
+- `YOUR_USERNAME` → your actual username
+- `YOUR_LEADER_IP` → IP of your leader node (or `127.0.0.1` if single machine)
+- `YOUR_GPU_IP` → IP of your GPU node (if you have one)
+- `${OPENROUTER_API_KEY}` → your actual OpenRouter API key
+
+**Example for single-machine setup:**
 ```yaml
-swarm:
-  name: "my-swarm"
-  leader_node: "rock-5b"
-  
+nodes:
+  - name: "my-desktop"
+    ip: "127.0.0.1"  # Single machine = localhost
+    role: "leader"
+    # ... rest of config
+```
+
+**Example for multi-node setup:**
+```yaml
 nodes:
   - name: "rock-5b"
-    ip: "192.168.1.100"
+    ip: "192.168.1.10"  # Your leader node IP
     role: "leader"
-    specs:
-      ram_gb: 32
-      storage_gb: 500
-    capabilities: ["orchestration", "heavy_context", "memory"]
-    
-  - name: "omen-gpu"
-    ip: "192.168.1.101"
+    # ...
+  - name: "workstation"
+    ip: "192.168.1.20"  # Your GPU node IP
     role: "worker"
-    specs:
-      ram_gb: 16
-      gpu: "RTX 3060"
-    capabilities: ["cuda_inference", "embedding", "ollama"]
-    
-  - name: "pi-5"
-    ip: "192.168.1.102"
-    role: "worker"
-    specs:
-      ram_gb: 8
-    capabilities: ["light_scripts", "monitoring"]
+    # ...
+```
 
+### 3.3 Configure Ollama (Optional but Recommended)
+
+If you have a GPU for local inference:
+
+```yaml
 backends:
-  openrouter:
-    enabled: true
-    model: "openrouter/moonshotai/kimi-k2.5"
-    
   ollama:
     enabled: true
-    endpoint: "http://192.168.1.101:11434"
-    default_model: "llama3:8b"
-    fallback_threshold: 0.8  # 80% of daily budget triggers fallback
-
-versioning:
-  registry_path: ~/.openclaw/versions/
-  
-preference_learning:
-  user_id: "your-username"
-  storage_path: ~/.openclaw/preferences/
+    endpoint: "http://YOUR_GPU_IP:11434"  # e.g., "http://192.168.1.20:11434"
+    default_model: "mistral:7b"
 ```
+
+If you don't have a GPU, set `enabled: false` and rely on OpenRouter.
+
+**Full template:** See `configs/swarm-example.yaml` for all configuration options with detailed comments.
 
 ## Step 4: Node Pairing
 

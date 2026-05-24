@@ -1,19 +1,29 @@
 # Backend Interface Configuration
-# Updated: 2026-05-24
+# 
+# IMPORTANT: Replace YOUR_* placeholders with your actual configuration
+# 
+# This file configures the connection to your local Ollama GPU node (if applicable)
+# and routing preferences between OpenRouter and local inference.
 
 backends:
   openrouter:
     enabled: true
     priority: 1
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: ${OPENROUTER_API_KEY}  # Set via environment variable
     default_model: "openrouter/moonshotai/kimi-k2.5"
     timeout_seconds: 60
     max_retries: 3
 
   ollama:
-    enabled: true
+    enabled: true  # Set to false if you don't have a local GPU
     priority: 2
-    default_endpoint: "http://192.168.4.108:11434"
+    # CHANGEME: Configure for YOUR setup
+    # Options:
+    # - Same machine as leader: "http://127.0.0.1:11434"
+    # - Different machine on LAN: "http://YOUR_GPU_IP:11434" (e.g., "http://192.168.1.20:11434")
+    # - Remote server: "http://your-server.com:11434" (not recommended for latency)
+    default_endpoint: "http://YOUR_GPU_IP:11434"
+    
     # Model routing based on task type
     default_model: "mistral:7b"              # Heavy reasoning, general tasks
     vision_model: "llava:7b"                 # Vision/multimodal tasks
@@ -28,38 +38,28 @@ backends:
       - llava:7b
       - moondream:latest
       
-      # Specialized
-      - phi4:14b-q4_K_M
-      - nomic-embed-text:latest
-      - snowflake-arctic-embed2:latest
-      - smollm2:360m
-      - llama3.1:latest
-      - moondream2:latest
-      - qwen2.5:latest
-      - granite3.1-moe:3b
-      - llama3.2:latest
-      - smollm:latest
-      - granite3.1-moe:latest
+      # Other models available in your Ollama installation
+      # Run: ollama list
+    
     timeout_seconds: 120
     max_retries: 2
 
-  local_rock:
-    enabled: false
-    endpoint: "http://localhost:11434"
+  local_machine:
+    enabled: false  # Enable if running Ollama on same machine as OpenClaw
+    endpoint: "http://127.0.0.1:11434"
 
 # Routing Configuration
 routing:
   # When to use Ollama vs OpenRouter
-  ollama_fallback_threshold: 80  # % of daily budget before Ollama becomes primary
+  ollama_fallback_threshold: 80  # % of daily budget before switching to local
   heavy_task_threshold: 1000     # tokens - route heavy load to GPU
   
   # Model selection based on task type
   model_selection:
-    heavy_reasoning: "mistral:7b"      # Complex analysis, planning
-    fast_response: "llama3.2:3b"       # Quick queries, simple tasks
-    vision: "llava:7b"                   # Image analysis, multimodal
-    code: "mistral:7b"                   # Code generation, review
-    embedding: "nomic-embed-text:latest"
+    heavy_reasoning: "mistral:7b"
+    fast_response: "llama3.2:3b"
+    vision: "llava:7b"
+    code: "mistral:7b"
   
   force_local_for:
     - simple_queries
@@ -70,16 +70,18 @@ routing:
 # Cost Tracking  
 cost_tracking:
   enabled: true
-  daily_budget: 5.00
-  monthly_budget: 100.00
+  daily_budget: 5.00   # CHANGEME: Your daily budget
+  monthly_budget: 100.00  # CHANGEME: Your monthly budget
 
+# Node configuration - CHANGEME: Update with your node details
 nodes:
-  omen_gpu:
-    ip: "192.168.4.108"
+  your_gpu_node:
+    name: "your-gpu-node-name"  # e.g., "workstation", "server"
+    ip: "YOUR_GPU_IP"  # e.g., "192.168.1.20", "10.0.0.5"
     ollama_port: 11434
     available: true
-    default_model: "llama3.2:3b"
+    default_model: "mistral:7b"
     capabilities:
-      - cuda_inference
+      - cuda_inference  # Remove if CPU-only
       - local_llm
       - high_volume
