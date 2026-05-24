@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v1.0.2] - 2026-05-24
+
+### Added
+- **skill-credential-manager** — Robust, secure credential management system
+  - Secure storage with proper file permissions and atomic writes
+  - Environment variable priority fallback
+  - Live token validation (GitHub PAT scopes, etc.)
+  - Automatic redaction in logs and outputs
+  - Audit logging (without exposing values)
+  - Simple API for other skills (`get_credential()`)
+  - CLI interface for easy management
+
+### Improved
+- Solves long-standing credential forgetting/redaction issues
+- Better security posture across the entire swarm pack
+- All skills can now reliably access credentials through the new manager
+
+### Notes
+- This is a foundational improvement that increases reliability and security of the whole Advanced Swarm Pack.
+
+
 ## [v1.0.1] - 2026-05-24
 
 ### Added

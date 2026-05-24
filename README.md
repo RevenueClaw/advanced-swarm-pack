@@ -15,7 +15,7 @@ The **Advanced Swarm Pack** transforms OpenClaw from a capable single-agent assi
 
 Built from the ground up on a **Radxa Rock 5B** (32GB RAM) with a simple mandate: *must run 24/7 without manual intervention.*
 
-**11 production-ready skills. 9,300+ lines of code. Battle-tested.**
+**12 production-ready skills. 10,200+ lines of code. Battle-tested.**
 
 ---
 
@@ -50,7 +50,7 @@ This release represents a significant leap forward in multi-agent reliability an
 
 ---
 
-## The 10 Skills
+## The 12 Skills
 
 ### 🧠 Intelligence & Planning (4 skills)
 
@@ -136,6 +136,28 @@ This skill goes beyond simple extraction. It intelligently scores ideas, automat
 AI Automation Agency Model — $20K+/mo potential (P0)
 Score: 74/100 | Effort: Medium | Strategic Fit: Excellent
 → Task automatically created
+```
+
+### 🔐 Infrastructure & Security (NEW in v1.0.2)
+
+**skill-credential-manager** — Secure, reliable credential management for the entire swarm.
+
+This skill solves one of the most common frustrations with OpenClaw — credentials being forgotten, redacted, or inaccessible between sessions.
+
+**Key Features:**
+- Secure storage with automatic redaction and audit logging
+- Environment variables take priority (great for Docker/advanced users)
+- Live validation for tokens (especially GitHub PATs)
+- Simple, clean API that other skills can depend on
+- CLI tools for easy management (`cred status`, `cred add`, `cred validate`)
+
+This is now the recommended way for all skills to handle API keys and tokens.
+
+**Example Usage:**
+```python
+# In any skill
+from credential_manager import get_credential
+token = get_credential("github_token")
 ```
 
 ### 📊 Bonus: Visualization
