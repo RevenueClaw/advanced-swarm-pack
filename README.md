@@ -68,10 +68,12 @@ The **Advanced Swarm Pack** transforms OpenClaw from a single-agent assistant in
 - Version promotion logs
 
 ### 🏗️ Architect-First Planning (NEW)
-- **Mandatory self-critique** before execution
+- **Automatic Mode Selection**: FAST (<2 tasks, low risk) → STANDARD → ARCHITECT_FIRST (complex/high risk)
+- **Mandatory self-critique** before execution on medium+ tasks
 - **5-dimensional plan scoring** (clarity, risk, completeness, feasibility, testability)
 - **Rollback planning** as first-class citizen
-- **Smart escalation** when plans are weak or uncertain
+- **Smart escalation** when plans are weak (score <60) or uncertain
+- **HITL Integration**: Auto-escalates to human when confidence is low
 - **80/20 discipline**: Plan extensively, execute confidently
 
 ---
