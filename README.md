@@ -28,7 +28,7 @@ This release represents a significant leap forward in multi-agent reliability an
 | **🏗️ Architect-First Planning** | "Plans fail because we don't think before acting" | Mandatory self-critique with 5D scoring |
 | **⏱️ Estimation Engine** | "Time estimates are always wrong" | Historical calibration with automatic buffers |
 | **🧮 Calculation Verifier** | "Math hallucinations" | Step-by-step Python-verified calculations |
-| **🖥️ Omen GPU Backend** | "OpenRouter costs spiraling" | Local Ollama fallback (14 models, tested) |
+| **🖥️ Optional GPU Node** | "OpenRouter costs spiraling" | Local Ollama fallback on any NVIDIA GPU |
 | **📧 Newsletter Processor** | "Missing business opportunities" | Auto-extract ideas from emails |
 
 **Plus 5 battle-tested foundational skills** for orchestration, learning, consensus, cost management, versioning, and visualization.
@@ -85,7 +85,7 @@ This release represents a significant leap forward in multi-agent reliability an
 - Automatic rerouting on node failure
 
 **skill-backend-interface** — Unified OpenRouter/Ollama API.
-- **Omen GPU Node (NEW)**: Local GPU with Ollama — 14 models available
+- **Optional GPU Node (NEW)**: Local Ollama on any CUDA GPU — gaming PC, old laptop, or workstation
 - Default routing: mistral:7b (heavy), llava:7b (vision), llama3.2:3b (fast)
 - Auto-fallback when OpenRouter budget exceeded
 
@@ -99,7 +99,7 @@ This release represents a significant leap forward in multi-agent reliability an
 
 **skill-resource-awareness** — Cost tracking and budget enforcement.
 - Tracks OpenRouter per-model daily/monthly ($5/$100 budgets)
-- Auto-switch to Omen GPU when threshold exceeded (80%)
+- Auto-switch to local GPU when OpenRouter budget exceeded (configurable threshold)
 - Latency monitoring for optimization
 
 **skill-preference-learning** — Long-term user preference tracking.
@@ -182,48 +182,89 @@ if not reviewed.recommend_proceed:
 
 ## 🔧 Hardware Setup
 
-### Flexible Configuration
+### Recommended Hardware Configurations
 
-The Swarm Pack works with **any hardware mix** — from single-machine setups to multi-node clusters.
+The Swarm Pack scales from single-machine setups to multi-node clusters. Choose the configuration that fits your needs and budget.
 
-### Example: 3-Node Production Swarm (Tested)
+#### Tier 1: Minimal (Single Node)
 
-This is what we run in production, but it's just one of many possible configurations:
+**Best for:** Getting started, personal projects, testing
 
-| Node | Hardware | Purpose | Notes |
-|------|----------|---------|-------|
-| **Leader** | 32GB RAM, 500GB NVMe | Orchestration, heavy context | Any powerful machine (ARM or x86) |
-| **GPU Worker** | 16GB RAM, RTX 3060 | Ollama LLM inference | Optional but recommended |
-| **Light Worker** | 8GB RAM, 256GB NVMe | Quick scripts, monitoring | Raspberry Pi, old laptop, etc. |
+| Component | Recommendation | Cost |
+|-----------|----------------|------|
+| **Leader** | [Radxa Rock 5B](https://www.amazon.com/Radxa-ROCK-5C-RK3588S2-32GB) or any PC with 8GB+ RAM | ~$80-200 |
+| **Storage** | 128GB NVMe SSD | ~$30 |
+| **GPU** | None — uses OpenRouter only | $0 |
 
-**Estimated Cost**: $300-500 for 3-node setup (one-time).
+**Total**: ~$110-250 one-time
 
-### Other Valid Configurations
+**Performance:** Runs all features except local GPU inference. Uses OpenRouter for LLM calls.
 
-- **Single Node**: Run everything on one powerful machine (16GB+ RAM recommended)
-- **2-Node**: Leader + GPU worker (skip light worker)
-- **Cloud**: 3 cloud VMs (DigitalOcean, AWS, etc.) — GPU optional
-- **Mixed**: Local leader + cloud workers, or vice versa
+---
 
-### Minimum Requirements
+#### Tier 2: Recommended (Leader + Worker)
 
-- **Single node setup**: 8GB RAM, 50GB storage
-- **With GPU**: CUDA-capable GPU for Ollama (optional but saves API costs)
-- **All setups**: Linux (Ubuntu/Debian recommended), Python 3.10+
+**Best for:** Production automation, 24/7 operation, cost savings with local inference
+
+| Component | Recommendation | Cost |
+|-----------|----------------|------|
+| **Leader** | [Radxa Rock 5B 32GB](https://www.amazon.com/Radxa-ROCK-5C-RK3588S2-32GB) | ~$200 |
+| **Worker** | [Raspberry Pi 5 8GB](https://www.amazon.com/Raspberry-Pi-8GB-SC1112-Quad-core/dp/B0CK2FCG1K) | ~$100 |
+| **Storage** | NVMe SSDs for both | ~$100 |
+
+**Total**: ~$400 one-time
+
+**Performance:** Distributed workload, Pi handles lightweight tasks. Good balance of power and efficiency.
+
+---
+
+#### Tier 3: Performance (Leader + Worker + Optional GPU Node)
+
+**Best for:** Heavy workloads, local LLM inference, cost optimization
+
+| Component | Recommendation | Cost |
+|-----------|----------------|------|
+| **Leader** | [Radxa Rock 5B 32GB](https://www.amazon.com/Radxa-ROCK-5C-RK3588S2-32GB) | ~$200 |
+| **Worker** | [Raspberry Pi 5 8GB](https://www.amazon.com/Raspberry-Pi-8GB-SC1112-Quad-core/dp/B0CK2FCG1K) | ~$100 |
+| **GPU Node** | Any old gaming PC or laptop with NVIDIA GPU | $0 (reuse old hardware) |
+| **Storage** | NVMe SSDs | ~$150 |
+
+**Total**: Variable ($300-600 depending on what hardware you have)
+
+**GPU Node Examples:**
+- Old gaming PC with GTX 1060+
+- Previous-generation laptop with RTX 3060
+- Dedicated workstation with RTX 4090
+- **Don't buy new** — repurpose existing hardware!
+
+**Performance:** Local Ollama inference saves API costs. GPU handles heavy LLM tasks.
+
+---
 
 ### Configuration
 
-After installation, edit `~/.openclaw/swarm-config.yaml` with your node IPs:
+After installation, edit `~/.openclaw/swarm-config.yaml` with your actual node IPs:
 
 ```yaml
+# Example: Tier 2 - Leader + Worker
 nodes:
-  - name: "my-leader"
-    ip: "192.168.1.10"  # Your leader node IP
-  - name: "my-gpu"
-    ip: "192.168.1.20"  # Your GPU node IP (if applicable)
+  - name: "rock-5b-leader"
+    ip: "192.168.1.10"  # CHANGEME: Your leader node IP
+    role: "leader"
+    
+  - name: "pi-5-worker"  
+    ip: "192.168.1.20"  # CHANGEME: Your worker node IP
+    role: "worker"
+    
+# Example: Tier 3 - Add GPU node (optional)
+# - name: "old-gaming-pc"
+#   ip: "192.168.1.30"  # CHANGEME: Your GPU node IP if applicable
+#   role: "worker"
 ```
 
-See `configs/swarm-example.yaml` for full configuration template.
+**Important:** Replace `192.168.1.x` with YOUR actual local network IPs. Find them with `ip addr` on Linux or `ifconfig` on each machine.
+
+See `configs/swarm-example.yaml` for complete configuration template with all options.
 
 ---
 
@@ -261,7 +302,7 @@ We're building a sustainable ecosystem:
 Every claim verified or marked experimental:
 
 - ✅ All skills include self-verification (`python skill.py` → tests pass)
-- ✅ Omen GPU node tested and responding (local GPU endpoint)
+- ✅ GPU node tested and responding (configurable endpoint)
 - ✅ End-to-end Architect-First workflow validated
 - ✅ Calculation verified: Python interpreter returns precise results
 - ✅ Estimation calibrated: Historical tracking functional

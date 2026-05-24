@@ -266,7 +266,7 @@ backends:
     
   ollama:
     enabled: true
-    endpoint: "http://192.168.4.108:11434"
+    endpoint: "http://YOUR_GPU_NODE_IP:11434"  # e.g., "http://192.168.1.30:11434"
     default_model: "mistral:7b"  # Heavy reasoning
     vision_model: "llava:7b"       # Multimodal
     fast_model: "llama3.2:3b"      # Quick responses

@@ -102,10 +102,10 @@ openclaw nodes pair --code <generated-code>
 # Check node status
 openclaw nodes status
 
-# Expected output:
-# rock-5b: connected, leader
-# omen-gpu: connected, worker
-# pi-5: connected, worker
+# Expected output (example - your node names will differ):
+# my-leader: connected, leader
+# my-worker: connected, worker
+# my-gpu: connected, worker (if configured)
 
 # Test skill versioning
 python -c "from skill_versioning import SkillVersionManager; print('✓ Versioning OK')"
@@ -133,4 +133,4 @@ python -c "from preference_engine import PreferenceEngine; print('✓ Preference
 
 - [GitHub Issues](https://github.com/RevenueClaw/advanced-swarm-pack/issues)
 - [Discussions](https://github.com/RevenueClaw/advanced-swarm-pack/discussions)
-- Email: shayne@revenueclaw.com
+- Email: See README.md for contact options
