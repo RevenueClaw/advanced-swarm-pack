@@ -1,37 +1,43 @@
-# RevenueClaw Advanced Swarm Pack v1.0 🚀
+# RevenueClaw Advanced Swarm Pack
 
-> **Enterprise-grade multi-agent orchestration for OpenClaw. The missing production layer.**
+**v1.0.2** — Production-grade enhancements for OpenClaw
 
-[![Release: v1.0](https://img.shields.io/badge/Release-v1.0-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
+Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
+
+[![Release: v1.0.2](https://img.shields.io/badge/Release-v1.0.2-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Built for OpenClaw](https://img.shields.io/badge/Built%20for-OpenClaw-green)](https://openclaw.ai)
 [![Status: Production](https://img.shields.io/badge/Status-Production-brightgreen)](.)
 
 ---
 
-## 🎯 What Is This?
-
-The **Advanced Swarm Pack** transforms OpenClaw from a capable single-agent assistant into a **distributed, production-ready multi-agent swarm** that runs continuously without crashing.
-
-Built from the ground up on a **Radxa Rock 5B** (32GB RAM) with a simple mandate: *must run 24/7 without manual intervention.*
-
-**12 production-ready skills. 10,200+ lines of code. Battle-tested.**
+### Current Status
+- **Version**: v1.0.2
+- **Production Skills**: 12
+- **Total Code**: ~9,500+ lines
+- **License**: MIT
 
 ---
 
-## 🏆 What's New in v1.0
+## What's New
 
-This release represents a significant leap forward in multi-agent reliability and intelligence:
+### v1.0.2 — Credential Manager
+- **skill-credential-manager**: Robust and secure credential handling
+- Automatic discovery & import of existing credentials
+- Live token validation and scope checking
+- Automatic redaction and audit logging
+- Simple API used by all other skills
 
-| **New System** | **Problem Solved** | **Key Capability** |
-|----------------|-------------------|-------------------|
-| **🏗️ Architect-First Planning** | "Plans fail because we don't think before acting" | Mandatory self-critique with 5D scoring |
-| **⏱️ Estimation Engine** | "Time estimates are always wrong" | Historical calibration with automatic buffers |
-| **🧮 Calculation Verifier** | "Math hallucinations" | Step-by-step Python-verified calculations |
-| **🖥️ Optional GPU Node** | "OpenRouter costs spiraling" | Local Ollama fallback on any NVIDIA GPU |
-| **📧 Newsletter Processor** | "Missing business opportunities" | Auto-extract ideas from emails |
+### v1.0.1 — Idea Tracker
+- **skill-idea-tracker**: Turns newsletters and emails into prioritized opportunities
+- 5D scoring system + automatic task creation (P0–P3)
+- Weekly digests and smart backlog management
 
-**Plus 6 battle-tested foundational skills** for orchestration, learning, consensus, cost management, versioning, visualization, and opportunity tracking.
+### v1.0.0 — Initial Release
+- Architect-First Planning System
+- Estimation Engine with historical calibration
+- Calculation Verifier
+- Hierarchical orchestration, visual reports, and more
 
 ---
 
@@ -50,7 +56,7 @@ This release represents a significant leap forward in multi-agent reliability an
 
 ---
 
-## The 12 Skills
+## Included Skills (12 Production-Ready)
 
 ### 🧠 Intelligence & Planning (4 skills)
 
