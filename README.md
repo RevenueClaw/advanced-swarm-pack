@@ -173,9 +173,18 @@ We're building a sustainable ecosystem around it:
 - **Enterprise Support** – SLA-backed support contracts
 
 ### 🛒 Affiliate Links
-- **[Radxa Rock 5B](https://example.com/affiliate)** – Powerful ARM SBC node
-- **[OpenRouter](https://openrouter.ai)** – Model aggregation API
-- **[Amazon Associates](https://example.com/affiliate)** – SSDs, networking gear
+Support the project by purchasing through these links:
+
+| Component | Link | Description |
+|-----------|------|-------------|
+| **Radxa Rock 5C 32GB** | [Amazon](https://www.amazon.com/Radxa-ROCK-5C-RK3588S2-32GB/dp/B0CYZWKY39?crid=1K9YHP3UEZ9OL&dib=eyJ2IjoiMSJ9.AQj5x4w3pIepOqFxSwgdwYZLLByPvSgECi9m-gjfyUhVMaDOWsMNASgtS0YXcNe_yfNs1nO-bN3J42BhFZH3WrY8nn2cAUcHqjyIiR52ynNrXJSrA8xM9ss0w9hiE_WsvuddB2_3b6e3GhvKVO4VLU8L7MwtonkJAWR8xmFfJB6VREpH1T2P4N3qCI-X9MBdewxynS5c_inPZQ5T_9zHHGD9ReM5Xf9P7sEGqDudAqs.Z5xxhRjjN_VA8OF7qZ5ukRxuD1hwYjXfkc9hyvbAPZ8&dib_tag=se&keywords=radxa%2Brock%2B5b&qid=1779624350&sprefix=radxa%2Br%2Caps%2C166&sr=8-3&th=1&linkCode=ll2&tag=affiliateseoagent-20&linkId=991c866b27cfc8cb6297e75974614923&language=en_US&ref_=as_li_ss_tl) | Leader node powerhouse |
+| **512GB NVMe SSD (Leader)** | [Amazon](https://www.amazon.com/dp/B0CP9BZLZ5?th=1&linkCode=ll2&tag=affiliateseoagent-20&linkId=36c670017a3aa9c91112809842dfaea8&language=en_US&ref_=as_li_ss_tl) | Fast storage for Rock 5B |
+| **Raspberry Pi 5 8GB** | [Amazon](https://www.amazon.com/Raspberry-Pi-8GB-SC1112-Quad-core/dp/B0CK2FCG1K?crid=34D1S78Y2BDNY&dib=eyJ2IjoiMSJ9.Sp47YT6mQg-bl96wOmzh84z72hMPCNWS8d4b5CX-JvudeYZStK6_j9PaZSaAsP3hjs0DL0RRlN9vT-bIZbzdZaZVnFr4DN-YnStNns00HZInOuaOopM53MnMuILrF3WOFM7SDA34pXj813S5jyhnMcV7gcpINtpNsoQ4YUHAgKoo30d6of1I5mRFYwpTUeko7P8ehIUaRh7aa6RkLVcYhVj6vBK8Eq6y3PwajFRFJ8kZs0iIklqz8gAOVfSFIuBX6Slv4kPhYM1Fqc6u-UzZdDMicWJ9Yql4Pvcy-u_ADsw.jDZmL9jKkDYrYQnlvGDBPh-zOIgp5XELTUrffgn1HVk&dib_tag=se&keywords=raspberry+pi+5&qid=1779624944&s=electronics&sprefix=ras%2Celectronics%2C167&sr=1-1&linkCode=ll2&tag=affiliateseoagent-20&linkId=ad4c7d7b3e7a22df6321d877f62d961e&language=en_US&ref_=as_li_ss_tl) | Light worker node |
+| **NVMe SSD HAT (Pi)** | [Amazon](https://www.amazon.com/dp/B0CPPGGDQT?&linkCode=ll2&tag=affiliateseoagent-20&linkId=eb24e224fe72b40bf188123cd95d3a64&language=en_US&ref_=as_li_ss_tl) | SSD adapter for Pi 5 |
+| **256GB NVMe SSD (Pi)** | [Amazon](https://www.amazon.com/dp/B0B7QFDFFQ?th=1&linkCode=ll2&tag=affiliateseoagent-20&linkId=c1f0d4472a0d10e7af2100adcf935505&language=en_US&ref_=as_li_ss_tl) | Storage for Pi node |
+| **Orange Pi Wireless R6** | [Amazon](https://www.amazon.com/dp/B0CFY7SJRN?&linkCode=ll2&tag=affiliateseoagent-20&linkId=9a93637b59e0485ebb12f1f81e009e10&language=en_US&ref_=as_li_ss_tl) | WiFi module for Rock 5B |
+| **Amazon Homepage** | [Shop Now](https://www.amazon.com?&linkCode=ll2&tag=affiliateseoagent-20&linkId=6fcdfffa79661e8b6d068751c7bde802&language=en_US&ref_=as_li_ss_tl) | General Amazon shopping |
+| **OpenRouter** | [API](https://openrouter.ai) | Model aggregation API |
 
 ### 🤝 Consulting
 Need help with your specific setup?
@@ -183,7 +192,7 @@ Need help with your specific setup?
 - **Integration services** – Connect to your existing infrastructure
 - **Training sessions** – Team onboarding for advanced features
 
-Email: shayne@revenueclaw.com
+Email: RevenueClaw@agentmail.to
 
 ---
 
