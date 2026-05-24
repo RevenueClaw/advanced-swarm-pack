@@ -37,6 +37,21 @@ A centralized credential management system that other skills depend on for secur
 
 ## Quick Start
 
+### 🎉 Auto-Discovery (First Run)
+
+Run `status` and the manager automatically scans for existing credentials:
+
+```bash
+python3 lib/credential_manager.py status
+# Output: 🔍 First run detected - scanning for existing credentials...
+#         ✨ Found 3 credential(s) to import...
+```
+
+Then import with review:
+```bash
+python3 lib/credential_manager.py discover --auto-import
+```
+
 ### For Other Skills
 
 ```python
@@ -58,9 +73,13 @@ token = mgr.require("github_token", required_scopes=["repo"])
 ### CLI Usage
 
 ```bash
-# Check all credentials
-cd skills/skill-credential-manager
+# Status (runs auto-discovery on first use)
 python3 lib/credential_manager.py status
+
+# Discover and import credentials
+python3 lib/credential_manager.py discover
+python3 lib/credential_manager.py discover --auto-import  # Auto-import safe ones
+python3 lib/credential_manager.py discover --auto-import --no-prompt  # For scripts
 
 # Add new credential
 python3 lib/credential_manager.py add \
@@ -75,6 +94,77 @@ python3 lib/credential_manager.py validate --name github_token
 # Delete credential
 python3 lib/credential_manager.py delete --name old_token
 ```
+
+## 🎉 Comprehensive Auto-Discovery & Import (v1.0.2)
+
+The credential manager **automatically finds and imports** existing credentials from **all common locations**. No more manual setup!
+
+### Discovery Sources (Comprehensive Scan)
+
+**Priority 1: OpenClaw Native**
+- ✅ `~/.openclaw/credentials/*.env` - Legacy credential files
+- ✅ `~/.openclaw/workspace/config/*.yaml` / `*.yml` - YAML configs
+
+**Priority 2: Standard Locations**
+- ✅ `~/.env` - Home directory env file
+- ✅ Project root `.env` files
+
+**Priority 3: Common Tool Configs**
+- ✅ `~/.config/openrouter/*.json`
+- ✅ `~/.ollama/config.json`
+
+**Priority 4: Environment Variables**
+- ✅ `GITHUB_TOKEN`, `GITHUB_PAT`, `ANTHROPIC_API_KEY`
+- ✅ `OPENROUTER_API_KEY`, `AGENTMAIL_API_KEY`, `ABUND_API_KEY`
+- ✅ `OLLAMA_HOST`, `OLLAMA_API_KEY`
+
+### Smart Detection
+
+**Service Recognition:**
+- GitHub: `ghp_*`, `github_pat_*` patterns (95% confidence)
+- OpenRouter: `sk-or-*` patterns (92% confidence)
+- AgentMail: `agent_*` or 32-char hex keys (88% confidence)
+
+### Discovery Workflow
+
+```bash
+# Step 1: Run status (triggers first-run discovery)
+python3 lib/credential_manager.py status
+
+# Step 2: Review and import
+python3 lib/credential_manager.py discover --auto-import
+```
+
+### Detailed Discovery Report
+
+```
+🔍 CREDENTIAL DISCOVERY REPORT
+============================================================
+
+✨ Found 4 credential(s):
+
+✅ Safe to Auto-Import (1):
+  • OLLAMA: ollama_config (75% confidence)
+
+⚠️ Requires Manual Review (3):
+  🔴 GITHUB: github_token (95% confidence)
+  🔴 OPENROUTER: openrouter_api_key (92% confidence)
+  🟡 AGENTMAIL: agentmail_api_key (88% confidence)
+```
+
+### Security Features
+
+- 🔴 **Critical services** (GitHub, AgentMail, OpenRouter) never auto-import
+- ✅ **Values masked** - only first/last 4 chars shown
+- ✅ **Deduplication** - same token won't be imported twice
+- ✅ **600 permissions** - imported files are secure
+- ✅ **Audit logging** - all operations logged (values never logged)
+
+### Discovery Commands
+- Never auto-imports critical services (GitHub, AgentMail) without review
+- Critical services require manual `add` command
+- All token values masked in logs and output
+- Imported credentials immediately get secure (600) permissions
 
 ## Storage Backends
 
@@ -192,8 +282,13 @@ architect.plan_step(
 ## CLI Reference
 
 ```bash
-# Status
+# Status (runs auto-discovery on first use)
 python3 lib/credential_manager.py status
+
+# Discover and import credentials
+python3 lib/credential_manager.py discover
+python3 lib/credential_manager.py discover --auto-import  # Auto-import non-critical
+python3 lib/credential_manager.py discover --auto-import --no-prompt  # For scripts
 
 # Add with interactive prompt (secure)
 python3 lib/credential_manager.py add \

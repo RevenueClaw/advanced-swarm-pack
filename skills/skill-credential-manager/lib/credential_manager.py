@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from storage import CredentialEntry, FileStorage, EnvVarFallback, ChainedStorage
 from validator import CredentialValidator, ValidationResult
 from audit import AuditLogger
+from discover import CredentialDiscovery
 
 
 @dataclass
@@ -307,6 +308,10 @@ class CredentialManager:
         """Get audit statistics."""
         return self.audit.get_stats(days)
     
+    def exists(self, name: str) -> bool:
+        """Check if credential exists in any backend."""
+        return self.storage.exists(name)
+    
     def _mask(self, value: str) -> str:
         """Mask credential value for display."""
         if len(value) <= 8:
@@ -324,6 +329,19 @@ class InsufficientScopesError(Exception):
     """Raised when credential lacks required scopes."""
     pass
 
+
+# -- Discovery & Import --
+
+def check_first_run_status(filepath: Path) -> bool:
+    """Check if this is the first time status has been run."""
+    marker = filepath.parent / ".discovery_completed"
+    return not marker.exists()
+
+def mark_discovery_completed(filepath: Path):
+    """Mark that discovery has been completed."""
+    marker = filepath.parent / ".discovery_completed"
+    marker.touch()
+    os.chmod(marker, 0o600)
 
 # Convenience function for backward compatibility
 def get_credential(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -344,12 +362,16 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Credential Manager CLI")
     parser.add_argument("command", 
-                     choices=["status", "add", "get", "delete", "validate"],
+                     choices=["status", "add", "get", "delete", "validate", "discover"],
                      help="Command to run")
     parser.add_argument("--name", help="Credential name")
     parser.add_argument("--value", help="Credential value (for add)")
     parser.add_argument("--service", help="Service name (for add)")
     parser.add_argument("--scopes", help="Required scopes (comma-separated)")
+    parser.add_argument("--auto-import", action="store_true", 
+                       help="Auto-import discovered credentials (for discover)")
+    parser.add_argument("--no-prompt", action="store_true",
+                       help="Skip interactive prompts (for scripts)")
     
     args = parser.parse_args()
     
@@ -373,10 +395,28 @@ if __name__ == "__main__":
                 if info.last_used:
                     print(f"   Last used: {info.last_used[:10]}")
         
-        # Show audit stats
+            # Show audit stats
         stats = mgr.get_audit_stats(days=7)
         print(f"\n📊 Audit (7 days): {stats['total_operations']} ops, "
               f"{stats['successful']} success")
+        
+        # Auto-discovery on first run
+        creds_dir = mgr.file_storage.base_dir
+        if check_first_run_status(creds_dir):
+            print("\n🔍 First run detected - scanning for existing credentials...")
+            discovered = CredentialDiscovery()
+            found = discovered.discover_all()
+            
+            if found:
+                print(f"\n✨ Found {len(found)} credential(s) to import:")
+                for cred in found:
+                    print(f"  • {cred.service.upper()}: {cred.suggested_name} (from {cred.source})")
+                
+                if not args.no_prompt:
+                    print("\nRun: python3 lib/credential_manager.py discover")
+                    print("To import these credentials with review.")
+                
+                mark_discovery_completed(creds_dir)
     
     elif args.command == "add":
         if not args.name or not args.value or not args.service:
@@ -421,6 +461,58 @@ if __name__ == "__main__":
             print(f"✅ Deleted: {args.name}")
         else:
             print(f"❌ Failed to delete: {args.name}")
+    
+    elif args.command == "discover":
+        print("\n🔍 Scanning for credentials...")
+        discovery = CredentialDiscovery()
+        found = discovery.discover_all()
+        
+        if not found:
+            print("No credentials found in common locations.")
+            print("\nSearched:")
+            print("  • Environment variables")
+            print("  • ~/.openclaw/credentials/*.env")
+            print("  • ~/.openclaw/workspace/config/*.yaml")
+            print("  • Common .env files")
+        else:
+            print(f"\n✨ Found {len(found)} credential(s):\n")
+            print(discovery.generate_report())
+            
+            if args.auto_import:
+                print("\n🚀 Auto-importing non-critical credentials...")
+                imported = 0
+                skipped = 0
+                
+                for cred in found:
+                    # Check if already exists
+                    if mgr.exists(cred.suggested_name):
+                        print(f"  ⏭️  {cred.suggested_name}: already exists")
+                        skipped += 1
+                        continue
+                    
+                    # Critical services require manual review
+                    from discover import CredentialDiscovery
+                    patterns = CredentialDiscovery.CREDENTIAL_PATTERNS
+                    config = patterns.get(cred.service, {})
+                    
+                    if config.get('critical') and not args.no_prompt:
+                        print(f"  ⚠️  {cred.suggested_name}: critical service, manual import required")
+                        print(f"      Run: python3 lib/credential_manager.py add --name {cred.suggested_name} --service {cred.service}")
+                        skipped += 1
+                        continue
+                    
+                    # Import
+                    if mgr.add(cred.suggested_name, cred.value, cred.service, cred.scopes):
+                        print(f"  ✅ {cred.suggested_name}: imported")
+                        imported += 1
+                    else:
+                        print(f"  ❌ {cred.suggested_name}: failed to import")
+                        skipped += 1
+                
+                print(f"\n Imported: {imported}, Skipped: {skipped}")
+            else:
+                print("\nTo import, run with --auto-import flag:")
+                print("  python3 lib/credential_manager.py discover --auto-import")
 
 
 # Self-test
