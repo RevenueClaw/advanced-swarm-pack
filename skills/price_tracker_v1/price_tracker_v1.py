@@ -212,44 +212,63 @@ class PriceTracker:
         }
     
     def _fetch_amazon_data(self, product: Dict) -> Dict:
-        """Fetch product data via Amazon Creators API or fallback."""
+        """
+        Fetch product data via Amazon Creators API or fallback.
+        Improved to automatically retry with web scraping if API returns None price.
+        """
         if not self.amazon_api:
             return {"error": "Amazon API not available"}
+        
+        result = None
         
         try:
             # Try ASIN lookup first
             if product.get("asin"):
                 result = self.amazon_api.get_item(product["asin"])
+            else:
+                # Fallback to search
+                results = self.amazon_api.search_items(
+                    product["query"],
+                    search_index="All",
+                    item_count=1
+                )
+                if results:
+                    result = results[0]
+                    result["source"] = "creators_api_search"
+            
+            # Check if we got valid data
+            if result:
+                # If price is None but we have an ASIN -> try scraping
+                if result.get("price") is None and product.get("asin"):
+                    print(f"  API returned no price for {product['asin']}, trying web scrape fallback...")
+                    scrape_result = self._scrape_amazon(product)
+                    if scrape_result and scrape_result.get("price"):
+                        # Merge: use API data + scraped price
+                        return {
+                            "title": result.get("title") if result.get("title") else scrape_result.get("title"),
+                            "price": scrape_result.get("price"),
+                            "currency": scrape_result.get("currency", "USD"),
+                            "affiliate_link": result.get("affiliate_link", scrape_result.get("affiliate_link")),
+                            "image_url": result.get("images", {}).get("primary", {}).get("large", {}).get("URL") or scrape_result.get("image_url"),
+                            "source": "api+scrape"
+                        }
+                
+                # Return API result (with or without price)
                 return {
                     "title": result.get("title"),
                     "price": result.get("price"),
                     "currency": result.get("currency", "USD"),
                     "affiliate_link": result.get("affiliate_link"),
                     "image_url": result.get("images", {}).get("primary", {}).get("large", {}).get("URL"),
-                    "source": "creators_api"
-                }
-            
-            # Fallback to search
-            results = self.amazon_api.search_items(
-                product["query"],
-                search_index="All",
-                item_count=1
-            )
-            
-            if results:
-                item = results[0]
-                return {
-                    "title": item.get("title"),
-                    "price": item.get("price"),
-                    "currency": item.get("currency", "USD"),
-                    "affiliate_link": item.get("affiliate_link"),
-                    "image_url": item.get("images", {}).get("primary", {}).get("large", {}).get("URL"),
-                    "source": "creators_api_search"
+                    "is_buy_box_winner": result.get("is_buy_box_winner"),
+                    "availability": result.get("availability"),
+                    "source": result.get("source", "creators_api")
                 }
             
             return {"error": "No results from Amazon API"}
             
         except Exception as e:
+            print(f"  API exception: {e}, trying web scrape fallback...")
             # Fallback to web scraping
             return self._scrape_amazon(product)
     

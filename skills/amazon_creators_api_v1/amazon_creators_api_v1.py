@@ -164,13 +164,19 @@ class AmazonCreatorsAPI:
             raise
     
     def get_item(self, asin: str, resources: Optional[List[str]] = None) -> Dict:
-        """Fetch product by ASIN."""
+        """
+        Fetch product by ASIN with comprehensive pricing data.
+        Prioritizes buy box winner, falls back to lowest available price.
+        """
         if resources is None:
             resources = [
-                "images.primary.large",
                 "itemInfo.title",
                 "itemInfo.byLineInfo",
-                "offersV2.listings.price"
+                "images.primary.large",
+                "offersV2.listings.price",
+                "offersV2.listings.availability",
+                "offersV2.listings.isBuyBoxWinner",
+                "offersV2.listings.condition"
             ]
         
         data = self._make_request("/catalog/v1/getItems", {
@@ -188,23 +194,59 @@ class AmazonCreatorsAPI:
         item = items[0]
         info = item.get("itemInfo", {})
         title = info.get("title", {}).get("displayValue")
+        brand = info.get("byLineInfo", {}).get("brand", {}).get("displayValue")
         
         # Build result
         result = {
             "asin": item.get("asin"),
             "title": title,
+            "brand": brand,
             "detail_page_url": item.get("detailPageURL"),
             "affiliate_link": f"https://www.amazon.com/dp/{asin}?tag={self.partner_tag}",
             "images": item.get("images", {})
         }
         
-        # Add price if available
+        # Parse offers with intelligent prioritization
         offers = item.get("offersV2", {}).get("listings", [])
+        selected_offer = None
+        
         if offers:
-            price_info = offers[0].get("price", {})
-            if price_info:
-                result["price"] = price_info.get("amount")
-                result["currency"] = price_info.get("currency")
+            # Priority 1: Buy Box Winner that is available
+            for offer in offers:
+                if offer.get("isBuyBoxWinner") and offer.get("availability", {}).get("type") in ["Now", "InStock"]:
+                    selected_offer = offer
+                    break
+            
+            # Priority 2: Lowest price available
+            if not selected_offer:
+                available_offers = [
+                    o for o in offers 
+                    if o.get("availability", {}).get("type") in ["Now", "InStock", "Available"]
+                ]
+                if available_offers:
+                    selected_offer = min(
+                        available_offers,
+                        key=lambda x: x.get("price", {}).get("amount", float('inf')) or float('inf')
+                    )
+            
+            # Priority 3: Any offer with a price
+            if not selected_offer:
+                for offer in offers:
+                    if offer.get("price", {}).get("amount"):
+                        selected_offer = offer
+                        break
+            
+            # Extract price data from selected offer
+            if selected_offer:
+                price_info = selected_offer.get("price", {})
+                if price_info:
+                    result["price"] = price_info.get("amount")
+                    result["currency"] = price_info.get("currency")
+                    result["price_display"] = price_info.get("displayAmount")
+                
+                result["availability"] = selected_offer.get("availability", {}).get("type")
+                result["is_buy_box_winner"] = selected_offer.get("isBuyBoxWinner")
+                result["condition"] = selected_offer.get("condition", {}).get("value")
         
         return result
     
