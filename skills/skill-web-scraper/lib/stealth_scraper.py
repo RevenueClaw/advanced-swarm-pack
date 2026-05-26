@@ -431,15 +431,19 @@ class StealthScraper:
             'Cache-Control': 'max-age=0',
         }
         
-        proxies = {"http://": request.proxy, "https://": request.proxy} if request.proxy else None
+        # httpx 0.26+ uses proxy= instead of proxies=
+        proxy = request.proxy
         
         try:
-            async with httpx.AsyncClient(
-                headers=headers,
-                proxies=proxies,
-                timeout=httpx.Timeout(request.timeout),
-                follow_redirects=True,
-            ) as client:
+            client_kwargs = {
+                "headers": headers,
+                "timeout": httpx.Timeout(request.timeout),
+                "follow_redirects": True,
+            }
+            if proxy:
+                client_kwargs["proxy"] = proxy
+                
+            async with httpx.AsyncClient(**client_kwargs) as client:
                 response = await client.get(request.url)
                 
                 if response.status_code == 200:

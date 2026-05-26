@@ -1,10 +1,10 @@
 # RevenueClaw Advanced Swarm Pack
 
-**v1.0.2** — Production-grade enhancements for OpenClaw
+**v1.1.0** — Production-grade enhancements for OpenClaw
 
 Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
-[![Release: v1.0.2](https://img.shields.io/badge/Release-v1.0.2-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
+[![Release: v1.1.0](https://img.shields.io/badge/Release-v1.1.0-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Built for OpenClaw](https://img.shields.io/badge/Built%20for-OpenClaw-green)](https://openclaw.ai)
 [![Status: Production](https://img.shields.io/badge/Status-Production-brightgreen)](.)
@@ -12,7 +12,7 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 ---
 
 ### Current Status
-- **Version**: v1.0.2
+- **Version**: v1.1.0
 - **Production Skills**: 13
 - **Total Code**: ~12,000+ lines
 - **License**: MIT
@@ -20,6 +20,13 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 ---
 
 ## What's New
+
+### v1.1.0 — Elite Web Scraper
+- **skill-web-scraper**: Production-grade stealth web scraping (2,659 lines)
+- Multi-engine: Nodriver (Chrome CDP) → Camoufox → Playwright → HTTP
+- 8-layer anti-detection: fingerprints, proxies, behavior, headers, session persistence
+- Content extraction: JSON-LD, meta tags, prices, products
+- Strictly self-hosted — no paid APIs
 
 ### v1.0.2 — Credential Manager
 - **skill-credential-manager**: Robust and secure credential handling
@@ -56,7 +63,7 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
 ---
 
-## Included Skills (12 Production-Ready)
+## Included Skills (13 Production-Ready)
 
 ### 🧠 Intelligence & Planning (4 skills)
 
@@ -83,7 +90,7 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 - Auto-triggers on: risk >0.6, confidence <0.7, novel situations
 - Structured synthesis with caveats
 
-### ⚙️ Orchestration & Infrastructure (3 skills)
+### ⚙️ Orchestration & Infrastructure (4 skills)
 
 **skill-hierarchical-orchestrator** — Task distribution across the swarm.
 - Supervisor agents decompose goals
@@ -91,16 +98,17 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 - Automatic rerouting on node failure
 
 **skill-backend-interface** — Unified OpenRouter/Ollama API.
-- **Optional GPU Node (NEW)**: Local Ollama on any CUDA GPU — gaming PC, old laptop, or workstation
+- **Optional GPU Node**: Local Ollama on any CUDA GPU
 - Default routing: mistral:7b (heavy), llava:7b (vision), llama3.2:3b (fast)
 - Auto-fallback when OpenRouter budget exceeded
 
-**skill-web-scraper** — Elite stealth web scraping (self-hosted only).
-- Multi-engine: Nodriver, Camoufox, Playwright, HTTP
-- Comprehensive stealth: fingerprint consistency + human behavior mimicry
-- Proxy rotation with health tracking and geolocation matching
-- Content extraction: JSON-LD, meta tags, CSS selectors
-- Strictly self-hosted — no paid APIs
+**skill-web-scraper** — Elite stealth web scraping (self-hosted only, 2,659 lines).
+- **Multi-engine cascade**: Nodriver (CDP Chrome) → Camoufox (stealth Firefox) → Playwright → HTTP
+- **8-layer anti-detection**: Fingerprints, WebGL/canvas noise, UA consistency, human behavior, proxy rotation, session persistence, header spoofing
+- **Content extraction**: JSON-LD Schema.org, OpenGraph meta, CSS selectors with fallbacks, price/product detection
+- **Proxy management**: Weighted rotation, health tracking, sticky sessions, geo-matching
+- **Strictly self-hosted**: No ScrapingBee, Scrapfly, or paid APIs
+- **Perfect for**: SBC price tracking, competitor research, data aggregation
 
 **skill-versioning** — Safe deployment with shadow testing.
 - Semantic versioning for skills

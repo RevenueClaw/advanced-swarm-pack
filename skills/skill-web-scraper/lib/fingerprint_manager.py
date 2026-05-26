@@ -46,18 +46,16 @@ class BrowserFingerprint:
     # WebGL / Graphics
     vendor: str
     renderer: str
-    webgl_noise: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
-    
-    # Canvas fingerprint noise (consistent within session)
-    canvas_seed: int = field(default_factory=lambda: random.randint(10000, 99999))
-    
-    # Audio fingerprint
-    audio_seed: int = field(default_factory=lambda: random.randint(10000, 99999))
     
     # Headers
     sec_ch_ua: str
     sec_ch_ua_mobile: str
     sec_ch_ua_platform: str
+    
+    # Canvas/WebGL/Audio noise (all default)
+    webgl_noise: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    canvas_seed: int = field(default_factory=lambda: random.randint(10000, 99999))
+    audio_seed: int = field(default_factory=lambda: random.randint(10000, 99999))
     
     # Plugins & Features
     pdf_viewer_enabled: bool = True
