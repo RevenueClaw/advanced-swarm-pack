@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v1.2.0] - 2026-05-26
+
+### Added
+- **skill-amazon-creators-api-v1** — Full Amazon Creators API integration
+  - OAuth 2.0 client credentials flow with automatic token refresh
+  - `getItems` and `searchItems` endpoints fully implemented
+  - Smart ASIN detection from URLs, search terms, or direct input
+  - Automatic affiliate link generation with partner tag
+  - Rate-limit resilience: 1 automatic retry on 429/5xx errors
+  - Response parsing: Handles `searchResult` and `itemsResult` structures
+  - Case-insensitive ASIN matching
+  - Fallback to web scraping if API unavailable
+  - Production-tested: Average response time ~1.3s
+
+- **skill-price-tracker-v1** — Multi-vendor price tracking with alerts
+  - SQLite storage for persistent price history
+  - Amazon Creators API integration (primary data source)
+  - Web scraping fallback for resilience
+  - Price drop detection with percentage thresholds
+  - Target price alerts for deal hunting
+  - Formatted reports with affiliate links
+  - ASIN/URL/search term input support
+  - Staggered checks to avoid rate limits
+  - CLI and Python API for automation
+
+### Integration Notes
+- Both skills work together seamlesly: `price_tracker_v1` uses `amazon_creators_api_v1` as primary data source
+- Perfect for automated deal monitoring, SBC price tracking, affiliate content generation
+- Credentials stored securely in `~/.openclaw/credentials/` (600 permissions)
+
+### Stats
+- Total skills: 15 (from 13)
+- Total code: ~13,500 lines (from ~12,000)
+
+
 ## [v1.1.0] - 2026-05-25
 
 ### Added

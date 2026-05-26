@@ -1,0 +1,14 @@
+# Amazon Creators API Configuration
+# Copy to ~/.openclaw/credentials/amazon_creators.env and fill in your values
+
+# OAuth Credentials (from Amazon Associates Central)
+AMAZON_CREATOR_CLIENT_ID={{AMAZON_CREATOR_CLIENT_ID}}
+AMAZON_CREATOR_CLIENT_SECRET={{AMAZON_CREATOR_CLIENT_SECRET}}
+
+# Partner Settings
+AMAZON_PARTNER_TAG={{PARTNER_TAG}}
+AMAZON_PARTNER_TYPE=Associates
+
+# Optional: Override endpoints
+# AMAZON_TOKEN_ENDPOINT=https://api.amazon.com/auth/o2/token
+# AMAZON_BASE_URL=https://creatorsapi.amazon

@@ -1,0 +1,17 @@
+# Never commit credentials
+credentials.env
+*.env
+.env.local
+.env.production
+token_cache.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Test output
+/test_output/
+*.log

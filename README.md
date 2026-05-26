@@ -1,10 +1,10 @@
 # RevenueClaw Advanced Swarm Pack
 
-**v1.1.0** — Production-grade enhancements for OpenClaw
+**v1.2.0** — Production-grade enhancements for OpenClaw
 
 Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
-[![Release: v1.1.0](https://img.shields.io/badge/Release-v1.1.0-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
+[![Release: v1.2.0](https://img.shields.io/badge/Release-v1.2.0-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Built for OpenClaw](https://img.shields.io/badge/Built%20for-OpenClaw-green)](https://openclaw.ai)
 [![Status: Production](https://img.shields.io/badge/Status-Production-brightgreen)](.)
@@ -12,14 +12,19 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 ---
 
 ### Current Status
-- **Version**: v1.1.0
-- **Production Skills**: 13
-- **Total Code**: ~12,000+ lines
+- **Version**: v1.2.0
+- **Production Skills**: 15
+- **Total Code**: ~13,500+ lines
 - **License**: MIT
 
 ---
 
 ## What's New
+
+### v1.2.0 — E-Commerce & Data Suite
+- **skill-amazon-creators-api-v1**: Full Amazon Creators API integration with OAuth, affiliate links, smart ASIN detection
+- **skill-price-tracker-v1**: Multi-vendor price tracking with SQLite storage, alerts, and affiliate reports
+- **Integration**: Both skills work together for automated deal monitoring
 
 ### v1.1.0 — Elite Web Scraper
 - **skill-web-scraper**: Production-grade stealth web scraping (2,659 lines)
@@ -180,6 +185,22 @@ This is now the recommended way for all skills to handle API keys and tokens.
 from credential_manager import get_credential
 token = get_credential("github_token")
 ```
+
+### 🛒 E-Commerce & Data (NEW in v1.2.0)
+
+**skill-amazon-creators-api-v1** — Production Amazon affiliate integration.
+- OAuth 2.0 token management with automatic refresh
+- Full API access: getItems, searchItems, price monitoring
+- Smart ASIN detection and affiliate link generation
+- Rate-limit resilience (1-retry on 429/5xx)
+- **Perfect for**: Price tracking, product catalogs, affiliate automation
+
+**skill-price-tracker-v1** — Multi-vendor price tracking with alerts.
+- SQLite storage for price history
+- Amazon Creators API integration (primary) + fallback scraping
+- Price drop detection and target price alerts
+- Generates formatted reports with affiliate links
+- **Perfect for**: Deal monitoring, price alerts, SBC/electronics tracking
 
 ### 📊 Bonus: Visualization
 
