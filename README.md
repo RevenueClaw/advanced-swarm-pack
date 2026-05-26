@@ -13,8 +13,8 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
 ### Current Status
 - **Version**: v1.0.2
-- **Production Skills**: 12
-- **Total Code**: ~9,500+ lines
+- **Production Skills**: 13
+- **Total Code**: ~12,000+ lines
 - **License**: MIT
 
 ---
@@ -94,6 +94,13 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 - **Optional GPU Node (NEW)**: Local Ollama on any CUDA GPU — gaming PC, old laptop, or workstation
 - Default routing: mistral:7b (heavy), llava:7b (vision), llama3.2:3b (fast)
 - Auto-fallback when OpenRouter budget exceeded
+
+**skill-web-scraper** — Elite stealth web scraping (self-hosted only).
+- Multi-engine: Nodriver, Camoufox, Playwright, HTTP
+- Comprehensive stealth: fingerprint consistency + human behavior mimicry
+- Proxy rotation with health tracking and geolocation matching
+- Content extraction: JSON-LD, meta tags, CSS selectors
+- Strictly self-hosted — no paid APIs
 
 **skill-versioning** — Safe deployment with shadow testing.
 - Semantic versioning for skills

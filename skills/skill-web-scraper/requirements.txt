@@ -1,0 +1,15 @@
+# Core dependencies (required)
+httpx>=0.27.0
+beautifulsoup4>=4.12.0
+lxml>=5.2.0
+
+# Browser engines (install as needed)
+nodriver>=0.39      # Best stealth - Chrome via CDP
+playwright>=1.43    # Reliable fallback
+
+# Optional enhancements
+fake-useragent>=1.5  # Additional UA rotation
+cssselect>=1.2      # Better CSS selector support
+
+# Development
+pytest>=8.0         # Testing (optional)
