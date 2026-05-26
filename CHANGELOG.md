@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v1.2.2] - 2026-05-26
+
+### Added
+- **skill-credential-guardian-v1**: Prevents credential loss/corruption forever
+  - Auto-validation on startup/skill load
+  - Auto-restore from master backup if corrupted/missing
+  - Timestamped backups before any file edit in credential folders
+  - Periodic health checks every 30 minutes
+  - Master store with SHA256 hashing for integrity
+  - CLI for manual backup/restore/validation
+  - Strong MEMORY.md entry re-loaded on every context refresh
+- **CRITICAL**: Credential persistence now enforced via guardian pattern
+
+### Stats
+- Total skills: 16 (from 15)
+- Total code: ~14,000 lines
+
+
+## [v1.2.1] - 2026-05-26
+
+### Fixed
+- **Amazon Creators API price extraction**: Now returns actual prices instead of None
+  - Added all required offersV2 resources: price, availability, isBuyBoxWinner, condition
+  - Implements intelligent offer prioritization (BuyBox winner > lowest available > any)
+  - Real-world test: Radxa Rock 5C now returns $176.00 (was returning None)
+  - Maintains rate-limit resilience and retry logic
+
+### Changed
+- **price_tracker_v1**: Auto-fallback to web scraping when API lacks price data
+  - Merges API metadata (title, images) with scraped price
+  - Transparent to calling code - just works
+
+
 ## [v1.2.0] - 2026-05-26
 
 ### Added

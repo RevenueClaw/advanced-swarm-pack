@@ -1,10 +1,10 @@
 # RevenueClaw Advanced Swarm Pack
 
-**v1.2.0** — Production-grade enhancements for OpenClaw
+**v1.2.2** — Production-grade enhancements for OpenClaw
 
 Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
-[![Release: v1.2.0](https://img.shields.io/badge/Release-v1.2.0-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
+[![Release: v1.2.2](https://img.shields.io/badge/Release-v1.2.2-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Built for OpenClaw](https://img.shields.io/badge/Built%20for-OpenClaw-green)](https://openclaw.ai)
 [![Status: Production](https://img.shields.io/badge/Status-Production-brightgreen)](.)
@@ -12,14 +12,27 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 ---
 
 ### Current Status
-- **Version**: v1.2.0
-- **Production Skills**: 15
-- **Total Code**: ~13,500+ lines
+- **Version**: v1.2.2
+- **Production Skills**: 16
+- **Total Code**: ~14,000+ lines
 - **License**: MIT
 
 ---
 
 ## What's New
+
+### v1.2.2 — Credential Guardian (CRITICAL)
+- **skill-credential-guardian-v1**: Prevents credential loss/corruption forever
+- Auto-validation on startup, auto-restore from master if corrupted
+- Timestamped backups before ANY credential file edit
+- Periodic health checks every 30 minutes
+- **CRITICAL**: Re-read MEMORY.md credential section
+
+### v1.2.1 — Price Extraction Fixed
+- **Amazon price extraction now works reliably**: Updated to use full offersV2 resources
+- **Intelligent offer selection**: Prioritizes BuyBox winner → lowest available → any offer
+- **Auto-fallback**: Web scraping triggers automatically if API returns None
+- **Tested**: Radxa Rock 5C correctly returns $176.00 (was returning None)
 
 ### v1.2.0 — E-Commerce & Data Suite
 - **skill-amazon-creators-api-v1**: Full Amazon Creators API integration with OAuth, affiliate links, smart ASIN detection
@@ -163,6 +176,30 @@ AI Automation Agency Model — $20K+/mo potential (P0)
 Score: 74/100 | Effort: Medium | Strategic Fit: Excellent
 → Task automatically created
 ```
+
+### 🛡️ Credential Persistence (NEW in v1.2.2 — CRITICAL)
+
+**skill-credential-guardian-v1** — Prevents credential loss/corruption forever.
+
+This is the most critical skill in the entire pack. It actively monitors credential files and automatically restores them from master backup if corrupted or missing.
+
+**Key Features:**
+- Auto-validation on startup/skill load
+- Auto-restore from master backup if corrupted/missing
+- Timestamped backups before ANY credential file edit
+- Periodic health checks every 30 minutes
+- Master store with SHA256 integrity checking
+- CLI for manual backup/restore/validation
+
+**CRITICAL RULE — NEVER FORGET:**
+```python
+# Before editing ANY credential file:
+from credential_guardian_v1 import CredentialGuardian
+guardian = CredentialGuardian()
+guardian.create_timed_backup(filepath, "pre_edit")
+```
+
+This skill is now active on all nodes. See MEMORY.md for full persistence rules.
 
 ### 🔐 Infrastructure & Security (NEW in v1.0.2)
 
