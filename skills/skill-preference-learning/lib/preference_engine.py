@@ -59,10 +59,43 @@ class PreferenceEngine:
         self.profile = ProfileManager(user_id, base_path)
         self.feedback = FeedbackIngestor(user_id, base_path)
         
+        # Initialize default complex coding preferences (v1.3.0)
+        self._init_complex_coding_defaults()
+        
         # Wire feedback -> profile
         self.feedback.register_preference_callback(
             self._on_preference_extracted
         )
+    
+    def _init_complex_coding_defaults(self):
+        """Initialize default preferences for complex coding (v1.3.0)."""
+        defaults = {
+            # Path resolution
+            "coding.path_resolution": ("runtime", 0.95, "system_default"),
+            
+            # File operations
+            "coding.file_operations": ("atomic", 0.95, "system_default"),
+            "coding.backup_required": (True, 0.95, "system_default"),
+            
+            # Logging patterns
+            "coding.logging_pattern": ("runtime_paths", 0.95, "system_default"),
+            
+            # Docker/infrastructure awareness
+            "coding.docker_aware": (True, 0.95, "system_default"),
+            "coding.import_time_safe": (True, 0.95, "system_default"),
+            
+            # Safety practices
+            "coding.scp_append_avoid": (True, 0.95, "system_default"),
+            "coding.verify_before_cascade": (True, 0.95, "system_default"),
+            
+            # Build/cache awareness
+            "coding.docker_build_no_cache_on_dependency_change": (True, 0.9, "system_default")
+        }
+        
+        for trait, (value, confidence, source) in defaults.items():
+            # Only set if not already learned
+            if self.profile.get_trait(trait) is None:
+                self.profile.learn_trait(trait, value, confidence, source)
     
     def _on_preference_extracted(self, preferences: List[Dict], ftype: Any, delta: float):
         """Callback when new preferences are extracted from feedback."""
@@ -149,6 +182,46 @@ class PreferenceEngine:
         if destructive:
             return True
         return False
+    
+    def get_coding_preferences(self) -> Dict[str, Any]:
+        """Get complex coding and infrastructure preferences."""
+        # Check for learned preferences, fallback to safe defaults
+        prefs = {
+            "path_resolution": self.profile.get_trait("coding.path_resolution") or "runtime",
+            "file_operations": self.profile.get_trait("coding.file_operations") or "atomic",
+            "backup_required": self.profile.get_trait("coding.backup_required") or True,
+            "logging_pattern": self.profile.get_trait("coding.logging_pattern") or "runtime_paths",
+            "docker_aware": self.profile.get_trait("coding.docker_aware") or True,
+            "import_time_safe": self.profile.get_trait("coding.import_time_safe") or True
+        }
+        return prefs
+    
+    def get_safe_edit_checklist(self) -> Dict[str, List[str]]:
+        """Get safe edit checklist for complex coding/infrastructure tasks."""
+        return {
+            "mandatory": [
+                "Create timestamped backup before any edit",
+                "Use atomic writes (temp file + rename)",
+                "Verify file integrity after write (content matches intent)"
+            ],
+            "for_docker": [
+                "Validate docker-compose syntax before applying",
+                "Check container health before and after edits",
+                "Verify volume mounts in 'docker inspect'",
+                "Never use SCP in append mode"
+            ],
+            "for_python": [
+                "Avoid import-time DB connections (move to init functions)",
+                "Avoid import-time network calls",
+                "Resolve paths at runtime, not import",
+                "Log actual paths at runtime, not assumed"
+            ],
+            "verification_steps": [
+                "Syntax check before write",
+                "Test dry-run if available",
+                "Verify rollback works before proceeding with cascade edits"
+            ]
+        }
 
 
 # Verification test
