@@ -270,7 +270,7 @@ class InfrastructureVerifier:
             return results
         
         # Check 1: DB connections at module level
-        if re.search(r'^[\s]*(?:db|conn|client|mongo|postgres)\s*=\s*(?:connect|MongoClient|Client)',
+        if re.search(r'^[\\s]*(?:db|conn|client|mongo|postgres)\\s*=\\s*(?:connect|MongoClient|Client)',
                      content, re.MULTILINE):
             results.append(VerificationResult(
                 check_name="import_time_db_connection",
@@ -281,7 +281,7 @@ class InfrastructureVerifier:
             ))
         
         # Check 2: Network calls at module level
-        if re.search(r'^[\s]*(?:requests|urllib|http)\.[a-z]+\s*\(', content, re.MULTILINE):
+        if re.search(r'^[\\s]*(?:requests|urllib|http)\.[a-z]+\\s*\(', content, re.MULTILINE):
             results.append(VerificationResult(
                 check_name="import_time_network_call",
                 status=VerificationStatus.WARNING.value,
@@ -291,7 +291,7 @@ class InfrastructureVerifier:
             ))
         
         # Check 3: File writes at module level
-        if re.search(r'^[\s]*with\s+open\s*\([^)]*[\'"]w', content, re.MULTILINE):
+        if re.search(r'^[\\s]*with\\s+open\\s*\([^)]*[\'"]w', content, re.MULTILINE):
             results.append(VerificationResult(
                 check_name="import_time_file_write",
                 status=VerificationStatus.WARNING.value,
@@ -323,8 +323,8 @@ class InfrastructureVerifier:
                 {"check": "Inspect volume mounts", "command": "docker inspect <container> --format '{{ json .Mounts }}'"}
             ],
             "for_python": [
-                {"check": "Check import-time side effects", "command": "grep -E '^(db|conn|client)\s*=.*connect' file.py"},
-                {"check": "Runtime path resolution", "command": "grep -E 'DB_PATH\s*=\s*os.path' file.py"}
+                {"check": "Check import-time side effects", "command": "grep -E '^(db|conn|client)\\s*=.*connect' file.py"},
+                {"check": "Runtime path resolution", "command": "grep -E 'DB_PATH\\s*=\\s*os.path' file.py"}
             ],
             "rollback": [
                 {"check": "Stop if unhealthy", "command": "docker compose stop || true"},
