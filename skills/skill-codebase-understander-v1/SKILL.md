@@ -221,6 +221,68 @@ cache.cleanup_older_than(days=30)
 - `lib/tours.py` - Guided exploration generation
 - `lib/integration.py` - Connectors for Architect-First, Estimation Engine
 - `lib/cache.py` - Graph persistence and incremental updates
+- `lib/docker_analyzer.py` - Docker/infrastructure analysis & Safe Edit Protocol
+
+## Docker & Infrastructure Analysis
+
+For complex multi-container projects (like ChipRadar):
+
+```python
+from lib.docker_analyzer import DockerAnalyzer, SafeEditProtocol
+
+# Analyze Docker setup
+docker = DockerAnalyzer("/path/to/chipradar")
+summary = docker.get_infrastructure_summary()
+volume_risks = docker.get_volume_risks()
+startup_order = docker.get_container_startup_order()
+
+# Find risky import-time code
+python_files = list(Path("/path/to/chipradar").rglob("*.py"))
+import_risks = docker.find_import_time_risks(python_files)
+
+# Safe editing with automatic backup
+editor = SafeEditProtocol("/path/to/chipradar", "/path/to/backups")
+result = editor.safe_edit(
+    file_path="docker-compose.yml",
+    content=new_compose_content,
+    verify_syntax=lambda c: yaml.safe_load(c)  # Validate YAML
+)
+
+if result['success']:
+    print(f"✅ Safe edit complete. Backup: {result['backup_id']}")
+else:
+    print(f"❌ Edit failed: {result['error']}")
+    # Rollback if needed
+    editor.rollback("docker-compose.yml", result['backup_id'])
+```
+
+### Safe Editing Protocol (CRITICAL)
+
+**Never lose data. Never leave containers broken.**
+
+The SafeEditProtocol guarantees:
+
+1. **Atomic Writes**: `temp.write() → verify → rename(temp, target)`
+2. **Timestamped Backups**: Every edit backed up with MD5 hash
+3. **Syntax Verification**: Validate before writing
+4. **Integrity Check**: Compare written content with intended
+5. **Rollback Plan**: One-call restore to previous state
+
+**Docker-Specific Safeguards:**
+- Never append via SCP (use atomic rsync or cat > file)
+- Check container health before and after
+- Verify volume mounts post-edit
+- Test docker-compose syntax before applying
+
+### Infrastructure Risks Detected
+
+| Risk Type | Detection | Example |
+|-----------|-----------|---------|
+| **Volume Mount** | Database in bind mount | `volumes: ['./data:/var/lib/postgres']` |
+| **Import Side Effect** | Connection on import | `db_client = MongoClient()` at module level |
+| **Startup Order** | Circular dependency | Service A depends on B, B depends on A |
+| **Secret Exposure** | Hardcoded credentials | `ENV API_KEY=secret123` in Dockerfile |
+| **Resource Leak** | Unbounded logs | Log volume without rotation config |
 
 ## Quick Reference
 

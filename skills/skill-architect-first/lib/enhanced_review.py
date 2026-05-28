@@ -32,6 +32,12 @@ try:
 except ImportError:
     CODEBASE_AVAILABLE = False
 
+try:
+    from lib.docker_analyzer import DockerAnalyzer, SafeEditProtocol
+    DOCKER_AVAILABLE = True
+except ImportError:
+    DOCKER_AVAILABLE = False
+
 from .plan_reviewer import PlanReviewer, ReviewedPlan, PlanScores
 
 
@@ -70,6 +76,8 @@ class EnhancedPlanReviewer(PlanReviewer):
             self._premortem = None
         
         self._codebase_analyzer = None
+        self._docker_analyzer = None
+        self._safe_editor = None
     
     def review_with_enhancements(
         self,
@@ -175,6 +183,58 @@ class EnhancedPlanReviewer(PlanReviewer):
             except Exception as e:
                 enhanced_result["codebase_error"] = str(e)
         
+        # Add Docker/infrastructure context for infra plans
+        if self._is_infra_plan(plan) and repo_path and DOCKER_AVAILABLE:
+            try:
+                docker_ctx = self._analyze_docker_context(repo_path)
+                
+                if docker_ctx:
+                    enhanced_result["docker_context"] = docker_ctx
+                    enhanced_result["enrichments_applied"].append("docker")
+                    
+                    # Add volume mount warnings
+                    if docker_ctx.get("volume_risks"):
+                        for risk in docker_ctx["volume_risks"][:3]:
+                            enhanced_result["enhanced_recommendations"].append(
+                                f"[DOCKER RISK] {risk['volume']}: {risk['risks'][0]}"
+                            )
+                    
+                    # Add import-time risk warnings
+                    if docker_ctx.get("import_risks"):
+                        for risk in docker_ctx["import_risks"][:2]:
+                            enhanced_result["enhanced_recommendations"].append(
+                                f"[IMPORT RISK] {risk['file']}:{risk['line']} - {risk['description']}"
+                            )
+                    
+                    # Add safe editing checklist for Docker changes
+                    enhanced_result["safe_edit_checklist"] = {
+                        "before_edit": [
+                            "Create timestamped backup of docker-compose.yml",
+                            "Create timestamped backup of Dockerfile(s)",
+                            "Verify current containers are healthy: `docker ps`"
+                        ],
+                        "during_edit": [
+                            "Use atomic writes (temp file + rename)",
+                            "Never use SCP append mode",
+                            "Validate docker-compose syntax: `docker compose config`"
+                        ],
+                        "after_edit": [
+                            "Test with `docker compose up --dry-run` if available",
+                            "Start with `docker compose up -d` for detached mode",
+                            "Verify container health: `docker ps` + `docker logs`",
+                            "Check volume mounts: `docker inspect <container>`"
+                        ],
+                        "rollback_plan": [
+                            "Stop new containers if unhealthy",
+                            "Restore from backup using SafeEditProtocol",
+                            "Down rev containers: `docker compose down`",
+                            "Up previous version: `docker compose up -d`"
+                        ]
+                    }
+                
+            except Exception as e:
+                enhanced_result["docker_error"] = str(e)
+        
         return enhanced_result
     
     def _should_trigger_premortem(self, plan: Dict[str, Any], score: int) -> bool:
@@ -205,6 +265,36 @@ class EnhancedPlanReviewer(PlanReviewer):
             return True
         
         return False
+    
+    def _is_infra_plan(self, plan: Dict[str, Any]) -> bool:
+        """Check if plan involves Docker/infrastructure changes."""
+        goal = plan.get("goal", "").lower()
+        context = str(plan.get("context", "")).lower()
+        
+        infra_keywords = [
+            "docker", "container", "compose", "kubernetes", "k8s",
+            "deployment", "infrastructure", "volume", "network",
+            "migration", "database", "postgres", "redis", "nginx"
+        ]
+        
+        return any(kw in goal or kw in context for kw in infra_keywords)
+    
+    def _analyze_docker_context(self, repo_path: str) -> Dict[str, Any]:
+        """Get Docker/infrastructure context for plan."""
+        if not DOCKER_AVAILABLE:
+            return {}
+        
+        if self._docker_analyzer is None:
+            self._docker_analyzer = DockerAnalyzer(repo_path)
+        
+        return {
+            "docker_summary": self._docker_analyzer.get_infrastructure_summary(),
+            "volume_risks": self._docker_analyzer.get_volume_risks(),
+            "startup_order": self._docker_analyzer.get_container_startup_order(),
+            "import_risks": self._docker_analyzer.find_import_time_risks(
+                list(Path(repo_path).rglob("*.py"))
+            )[:5]  # Top 5
+        }
     
     def _is_dev_plan(self, plan: Dict[str, Any]) -> bool:
         """Check if plan involves code changes."""
