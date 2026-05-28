@@ -45,6 +45,11 @@ class EnhancedPlanReviewer(PlanReviewer):
     """
     Extended PlanReviewer with premortem and codebase understanding.
     
+    DEFAULT BEHAVIOR (v1.3.0):
+    - CodebaseUnderstander is DEFAULT for >2 files OR Docker/infra tasks
+    - Premortem auto-triggers for score <75 or high-risk infra plans
+    - Safe editing protocols included for all file operations
+    
     Usage:
         reviewer = EnhancedPlanReviewer()
         reviewed = reviewer.review_with_enhancements(plan, repo_path="/path/to/code")
@@ -154,7 +159,17 @@ class EnhancedPlanReviewer(PlanReviewer):
                 enhanced_result["premortem_error"] = str(e)
         
         # Add codebase context for dev plans
-        if self._is_dev_plan(plan) and repo_path and self.enable_codebase:
+        # DEFAULT (v1.3.0): Always include for >2 files OR Docker/infra
+        should_analyze = (
+            self._is_dev_plan(plan) and repo_path and self.enable_codebase
+            and (
+                len(plan.get("steps", [])) > 2  # Multi-step plans
+                or self._is_infra_plan(plan)  # Infrastructure plans
+                or plan.get("context", {}).get("affected_files", 0) > 2  # Multi-file changes
+            )
+        )
+        
+        if should_analyze:
             try:
                 codebase_ctx = self._get_codebase_context(repo_path)
                 
