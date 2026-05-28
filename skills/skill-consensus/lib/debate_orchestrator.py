@@ -14,6 +14,7 @@ Status: VERIFIED
 """
 
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -123,15 +124,39 @@ class DebateOrchestrator:
         self,
         question: str,
         context: Dict[str, Any],
-        personas: Optional[List[AgentPersona]] = None
+        personas: Optional[List[AgentPersona]] = None,
+        include_premortem: bool = True,
+        include_codebase: bool = True
     ) -> DebateResult:
         """
         Conduct multi-agent debate.
         
         In real implementation, this would spawn subagents.
         For now, returns structured framework for manual execution.
+        
+        Args:
+            include_premortem: Auto-include premortem analysis if available
+            include_codebase: Auto-include codebase understander context
         """
-        personas = personas or AgentPersonas.get_three_persona_panel()
+        # Auto-select infrastructure panel for Docker/infra questions
+        if self._is_infrastructure_question(question, context):
+            personas = personas or AgentPersonas.get_infrastructure_panel()
+        else:
+            personas = personas or AgentPersonas.get_three_persona_panel()
+        
+        # Enrich context with premortem and codebase analysis
+        enriched_context = dict(context)
+        
+        if include_premortem:
+            premortem_ctx = self._get_premortem_context(question, context)
+            if premortem_ctx:
+                enriched_context["premortem_analysis"] = premortem_ctx
+        
+        if include_codebase:
+            codebase_ctx = self._get_codebase_context(question, context)
+            if codebase_ctx:
+                enriched_context["codebase_analysis"] = codebase_ctx
+        
         debate_id = hashlib.sha256(
             f"{question}{datetime.now().isoformat()}".encode()
         ).hexdigest()[:16]
@@ -151,7 +176,7 @@ class DebateOrchestrator:
             debate_id=debate_id,
             timestamp=datetime.now().isoformat(),
             question=question,
-            context=context,
+            context=enriched_context,
             positions=positions,
             synthesis="[Pragmatic would synthesize here]",
             recommendation="[Final recommendation]",
@@ -173,7 +198,12 @@ class DebateOrchestrator:
         Generate prompts for each debate participant.
         Returns prompts keyed by persona name.
         """
-        personas = AgentPersonas.get_three_persona_panel()
+        # Use infrastructure panel for infra questions
+        if self._is_infrastructure_question(question, context):
+            personas = AgentPersonas.get_infrastructure_panel()
+        else:
+            personas = AgentPersonas.get_three_persona_panel()
+        
         prompts = {}
         
         for persona in personas:
@@ -196,6 +226,58 @@ Confidence: [score]
 """
         
         return prompts
+    
+    def _is_infrastructure_question(self, question: str, context: Dict[str, Any]) -> bool:
+        """Check if question involves Docker/infrastructure."""
+        combined = f"{question} {str(context)}".lower()
+        infra_keywords = [
+            "docker", "container", "compose", "kubernetes", "k8s",
+            "deployment", "infrastructure", "volume", "network",
+            "migration", "database", "postgres", "redis", "nginx"
+        ]
+        return any(kw in combined for kw in infra_keywords)
+    
+    def _get_premortem_context(self, question: str, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Get premortem analysis for high-stakes questions."""
+        try:
+            sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skill-premortem-v1"))
+            from lib.premortem_analyzer import PremortemAnalyzer
+            
+            if context.get("goal") or context.get("plan"):
+                analyzer = PremortemAnalyzer()
+                result = analyzer.analyze_risk(
+                    goal=context.get("goal", question),
+                    steps=context.get("plan", {}).get("steps", [])
+                )
+                return {
+                    "most_likely_failure": result.get("most_likely_failure"),
+                    "tail_risks": [r.get("scenario") for r in result.get("tail_risks", [])[:3]],
+                    "hidden_assumptions": [a.get("assumption") for a in result.get("hidden_assumptions", [])[:3]]
+                }
+        except:
+            pass
+        return None
+    
+    def _get_codebase_context(self, question: str, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Get codebase understander context for coding questions."""
+        try:
+            sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skill-codebase-understander-v1"))
+            from lib.docker_analyzer import DockerAnalyzer
+            
+            repo_path = context.get("repo_path")
+            if repo_path and Path(repo_path).exists():
+                analyzer = DockerAnalyzer(repo_path)
+                return {
+                    "volume_risks": analyzer.get_volume_risks()[:3],
+                    "startup_order": analyzer.get_container_startup_order(),
+                    "import_risks": [
+                        {"file": r.file, "line": r.line, "type": r.risk_type}
+                        for r in analyzer.find_import_time_risks(list(Path(repo_path).rglob("*.py")))[:3]
+                    ]
+                }
+        except:
+            pass
+        return None
 
 
 # Verification test
