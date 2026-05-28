@@ -6,6 +6,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v1.3.0] - 2026-05-28
+
+### Added
+- **skill-premortem-v1**: Structured failure analysis to counter optimism bias
+  - Gary Klein-style premortem: "Assume failure, then explain why"
+  - Identifies most likely failures, tail risks, and hidden assumptions
+  - Generates Early Warning Indicators (EWIs) for monitoring
+  - Creates revised plan with embedded mitigations
+  - Outputs risk score adjustments for PlanReviewer
+  - Three depth levels: quick (2-3 min), standard (5-7 min), deep (10-15 min)
+
+- **skill-codebase-understander-v1**: Deep codebase comprehension via knowledge graphs
+  - Multi-language static analysis (Python, JavaScript/TypeScript, Go, Rust, Java)
+  - Local-first: No code leaves your machine
+  - Impact analysis: "What breaks if I change X?"
+  - Dependency chain mapping and circular dependency detection
+  - Dead code identification
+  - Guided tours for onboarding and feature exploration
+  - Auto-generates complexity reports for Estimation Engine calibration
+  - Optional integration with Understand-Anything self-hosted pipeline
+
+### Changed
+- **skill-architect-first**: Enhanced review with premortem and codebase context
+  - EnhancedPlanReviewer class extends base PlanReviewer
+  - Auto-triggers premortem for plans scoring <75 or with >3 steps
+  - Injects codebase context for development plans (complexity, dependency depth)
+  - Adds critical mitigations to recommendations from premortem analysis
+  - Adjusts scores based on hidden risks discovered
+
+- **skill-estimation-engine**: Improved calibration with codebase data
+  - Complexity-based adjustments: high fan-out, tight coupling detection
+  - Test coverage gap adjustments (+15-30% when untested dependents found)
+  - Separate "risk-adjusted" vs "optimistic" estimates
+  - Refactor-specific estimation guidance
+
+- **skill-consensus**: Optionally includes premortem insights in debates
+  - Conservative persona receives tail risk awareness
+  - Debate context enriched with hidden assumptions
+
+### Stats
+- Total skills: 18 (from 16)
+- Total code: ~16,000 lines
+- New integration points: 5 (Premortem ↔ Architect-First, Codebase ↔ Architect-First, Codebase ↔ Estimation, Premortem ↔ Consensus, Premortem ↔ Estimation)
+
+
 ## [v1.2.2] - 2026-05-26
 
 ### Added

@@ -1,0 +1,126 @@
+{
+  "version": "1.0.0",
+  "examples": [
+    {
+      "name": "E-commerce Price Tracker Integration",
+      "goal": "Integrate Amazon affiliate API for real-time price tracking",
+      "steps": [
+        "Set up Amazon Product Advertising API credentials",
+        "Build rate-limited API client with caching",
+        "Integrate with price alert notification system",
+        "Add affiliate link generation"
+      ],
+      "context": "Production ChipRadar system with existing users, e-commerce domain, revenue-critical",
+      "risk_tolerance": "low",
+      "depth": "standard",
+      "output": {
+        "most_likely_failure": {
+          "scenario": "Amazon API rate limits exceeded during peak hours, causing cascading alert delays",
+          "probability": "high",
+          "impact": "customer-facing degraded experience",
+          "root_cause": "No circuit breaker or fallback strategy defined"
+        },
+        "tail_risks": [
+          {
+            "scenario": "Amazon affiliate account revoked for TOS violation",
+            "probability": "low",
+            "impact": "catastrophic - core revenue stream disabled"
+          },
+          {
+            "scenario": "Price data inaccuracy leads to user trust loss or liability",
+            "probability": "low",
+            "impact": "critical - reputational damage"
+          }
+        ],
+        "key_mitigations": [
+          "Implement circuit breaker with exponential backoff (critical)",
+          "Add stale-data cache fallback for API unavailability (critical)",
+          "Review API usage policy compliance (high)",
+          "Price accuracy validation with confidence thresholds (high)"
+        ],
+        "hidden_assumptions": [
+          "Amazon API remains accessible and affordable",
+          "User notification preferences remain stable",
+          "Product IDs (ASINs) are stable over time"
+        ]
+      }
+    },
+    {
+      "name": "Database Schema Migration",
+      "goal": "Migrate from SQLite to PostgreSQL for production scaling",
+      "steps": [
+        "Create new PostgreSQL schema",
+        "Build data migration scripts",
+        "Test migration on production-sized dataset",
+        "Deploy with blue-green strategy"
+      ],
+      "context": "Production database with customer data, high risk, requires zero downtime",
+      "risk_tolerance": "low",
+      "depth": "deep",
+      "output": {
+        "most_likely_failure": {
+          "scenario": "Migration runs longer than planned, extends maintenance window",
+          "probability": "high",
+          "impact": "customer-facing downtime",
+          "root_cause": "Underestimated data volume or query performance"
+        },
+        "tail_risks": [
+          {
+            "scenario": "Data corruption during migration",
+            "probability": "unlikely",
+            "impact": "catastrophic - customer data loss"
+          },
+          {
+            "scenario": "Rollback fails because old system state incompatible",
+            "probability": "low",
+            "impact": "critical - stuck in partial migration"
+          }
+        ],
+        "key_mitigations": [
+          "3-2-1 backup strategy (3 copies, 2 media, 1 offsite) - critical",
+          "Dry-run migration on production dataset before actual cutover - critical",
+          "Blue-green deployment with instant rollback - critical",
+          "Data integrity checksums at each stage - high"
+        ],
+        "early_warning_indicators": [
+          "Migration script running >50% over dry-run time",
+          "Rollback test fails on staging",
+          "Data validation checksum mismatch",
+          "Connection pool exhaustion during migration"
+        ]
+      }
+    },
+    {
+      "name": "Feature Launch - Social Sharing",
+      "goal": "Add social media sharing and viral tracking to ChipRadar",
+      "steps": [
+        "Design social card templates",
+        "Build share button integration",
+        "Add UTM tracking parameters"
+      ],
+      "context": "New feature, customer-facing but non-critical",
+      "risk_tolerance": "medium",
+      "depth": "quick",
+      "output": {
+        "most_likely_failure": {
+          "scenario": "Low adoption because sharing UX is too many clicks",
+          "probability": "high",
+          "impact": "low - feature just not used",
+          "root_cause": "Friction not tested with real users"
+        },
+        "tail_risks": [
+          {
+            "scenario": "Social platform blocks app for spam-like behavior",
+            "probability": "low",
+            "impact": "moderate - blocked from platform"
+          }
+        ],
+        "key_mitigations": [
+          "Test sharing flow with 5 beta users (high)",
+          "Rate limit share generation per user (medium)",
+          "Fallback to copy-link for blocked platforms (low)"
+        ]
+      }
+    }
+  ]
+}

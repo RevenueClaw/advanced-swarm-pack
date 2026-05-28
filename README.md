@@ -1,10 +1,10 @@
 # RevenueClaw Advanced Swarm Pack
 
-**v1.2.2** — Production-grade enhancements for OpenClaw
+**v1.3.0** — Production-grade enhancements for OpenClaw
 
 Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
-[![Release: v1.2.2](https://img.shields.io/badge/Release-v1.2.2-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
+[![Release: v1.3.0](https://img.shields.io/badge/Release-v1.3.0-blue.svg)](https://github.com/RevenueClaw/advanced-swarm-pack/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Built for OpenClaw](https://img.shields.io/badge/Built%20for-OpenClaw-green)](https://openclaw.ai)
 [![Status: Production](https://img.shields.io/badge/Status-Production-brightgreen)](.)
@@ -12,14 +12,28 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 ---
 
 ### Current Status
-- **Version**: v1.2.2
-- **Production Skills**: 16
-- **Total Code**: ~14,000+ lines
+- **Version**: v1.3.0
+- **Production Skills: 18
+- **Total Code**: ~16,000+ lines
 - **License**: MIT
 
 ---
 
 ## What's New
+
+### v1.3.0 — Enhanced Intelligence & Code Intelligence (LATEST)
+- **skill-premortem-v1**: Counter optimism bias with structured failure analysis
+  - Gary Klein-style premortem: "Assume failure, then explain why"
+  - Identifies most likely failures, tail risks, hidden assumptions
+  - Generates Early Warning Indicators (EWIs) for monitoring
+  - Integrates with Architect-First (auto-triggers for score <75)
+  - Three depth levels: quick (2-3 min), standard (5-7 min), deep (10-15 min)
+- **skill-codebase-understander-v1**: Deep codebase comprehension with knowledge graphs
+  - Multi-language static analysis: Python, JS/TS, Go, Rust, Java
+  - Local-first: No code leaves your machine
+  - "What breaks if I change X?" impact analysis with file lists
+  - Complexity-based time estimate adjustments for Estimation Engine
+  - Dead code detection and guided architecture tours
 
 ### v1.2.2 — Credential Guardian (CRITICAL)
 - **skill-credential-guardian-v1**: Prevents credential loss/corruption forever
@@ -81,9 +95,9 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 
 ---
 
-## Included Skills (13 Production-Ready)
+## Included Skills (18 Production-Ready)
 
-### 🧠 Intelligence & Planning (4 skills)
+### 🧠 Intelligence & Planning (6 skills)
 
 **skill-architect-first** — *The crown jewel.* Production-grade planning with mandatory self-critique.
 - **PlanReviewer**: 5-dimensional scoring (clarity, risk, completeness, feasibility, testability)
@@ -107,6 +121,20 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 - 3-persona panel: Conservative (risks), Pragmatic (balance), Innovative (opportunities)
 - Auto-triggers on: risk >0.6, confidence <0.7, novel situations
 - Structured synthesis with caveats
+
+**skill-premortem-v1** — Counter optimism bias with structured failure analysis (NEW v1.3.0).
+- Gary Klein premortem: "Assume failure has occurred, now explain why"
+- Identifies most likely failures, catastrophic tail risks, hidden assumptions
+- Generates Early Warning Indicators (EWIs) for production monitoring
+- Auto-integrates with Architect-First (triggers for score <75 or >3 step plans)
+- Three depth levels: quick (2-3 min), standard (5-7 min), deep (10-15 min)
+
+**skill-codebase-understander-v1** — Deep codebase comprehension via knowledge graphs (NEW v1.3.0).
+- Multi-language static analysis: Python, JS/TS, Go, Rust, Java
+- Impact analysis: "What breaks if I change X?" with exact file lists
+- Dependency depth calculation and circular dependency detection
+- Complexity-accurate time estimates for Estimation Engine
+- Local-first: No code leaves your machine
 
 ### ⚙️ Orchestration & Infrastructure (4 skills)
 
@@ -177,7 +205,7 @@ Score: 74/100 | Effort: Medium | Strategic Fit: Excellent
 → Task automatically created
 ```
 
-### 🛡️ Credential Persistence (NEW in v1.2.2 — CRITICAL)
+### 🛡️ Credential Persistence (NEW in v1.3.0 — CRITICAL)
 
 **skill-credential-guardian-v1** — Prevents credential loss/corruption forever.
 
