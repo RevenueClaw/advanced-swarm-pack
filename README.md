@@ -286,8 +286,11 @@ npm install -g openclaw
 git clone https://github.com/RevenueClaw/advanced-swarm-pack.git
 cd advanced-swarm-pack
 
-# 3. Install all 11 skills
+# 3. Install all skills (v1.3.1: Now includes e-commerce skills!)
 ./scripts/install-skills.sh
+# Installs 25+ skills including:
+#  - skill-* prefixed (orchestration, planning, scraping)
+#  - *_v1 suffixed (e-commerce: amazon, price-tracker, etc.)
 
 # 4. Configure your swarm
 cp configs/swarm-example.yaml ~/.openclaw/swarm-config.yaml

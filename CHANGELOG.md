@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v1.3.1] - 2026-05-29
+
+### Fixed
+- **install-skills.sh**: Now properly installs ALL skills, including v1 suffixed e-commerce skills
+  - Fixed: Script only matched `skill-*` pattern, missing `*_v1` skills (amazon_creators_api_v1, price_tracker_v1, etc.)
+  - Added: Loop for `*_v1` directory pattern
+  - Added: Proper symlink creation to `~/.openclaw/workspace/skills/`
+  - Added: Installation statistics (new/skipped/total)
+  - Changed: Creates symlinks instead of just setting up directories
+  
+### Impact
+- E-commerce skills now properly deploy: amazon_creators_api_v1, price_tracker_v1, multi_vendor_tracker_v1, deal_alert_engine_v1, content_generator_v1, credential_guardian_v1
+- Skills are now accessible via standard OpenClaw skill loading mechanism
+- Total skills properly deployed: 25+
+
+---
+
 ## [v1.3.0] - 2026-05-28
 
 ### Added
