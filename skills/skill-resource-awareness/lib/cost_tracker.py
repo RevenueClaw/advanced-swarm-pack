@@ -1,289 +1,188 @@
 #!/usr/bin/env python3
-"""CostTracker - Token usage and cost accounting.
+"""
+Cost Tracker - v1.4.0 Enhanced with local/cloud cost optimization.
 
-Pricing (OpenRouter):
-- kimi-k2.5: $0.50 / 1M input, $2.00 / 1M output tokens
-- o1-preview: $15 / 1M input, $60 / 1M output tokens
-- gpt-4o: $2.50 / 1M input, $10 / 1M output tokens
+Tracks costs and routes between OpenRouter and local models.
 
 Author: RockClaw
-Version: 1.0.0-alpha
-Status: VERIFIED
 """
 
 import json
+import time
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-from dataclasses import dataclass
 
 
 @dataclass
 class UsageRecord:
-    """Single request usage."""
+    """Single usage record."""
     timestamp: str
-    backend: str
+    provider: str  # openrouter, local_llama, ollama
     model: str
-    input_tokens: int
-    output_tokens: int
-    cost_usd: float
-    latency_ms: int
-
-
-MODEL_PRICING = {
-    "openrouter/moonshotai/kimi-k2.5": {"input": 0.50, "output": 2.00},
-    "openrouter/moonshotai/kimi-k2.6": {"input": 0.50, "output": 2.00},
-    "openrouter/openai/o1-preview": {"input": 15.00, "output": 60.00},
-    "openrouter/openai/gpt-4o": {"input": 2.50, "output": 10.00},
-    "ollama/llama3:8b": {"input": 0.00, "output": 0.00},
-    "local": {"input": 0.00, "output": 0.00},
-}
-
-DAILY_BUDGET_USD = 5.00
-MONTHLY_BUDGET_USD = 100.00
-
+    prompt_tokens: int
+    completion_tokens: int
+    wall_time_ms: int
+    task_type: str
+    estimated_cost: float
+    
 
 class CostTracker:
     """
-    Tracks token usage and costs across backends.
-    
-    Storage:
-    ~/.openclaw/workspace/skills/skill-resource-awareness/cost_logs/daily/YYYY-MM-DD.json
+    Cost tracking with v1.4.0 enhancements:
+    - Local vs cloud cost comparison
+    - Estimated savings tracking
+    - Routing decision metrics
     """
     
-    def __init__(self, log_base: Optional[Path] = None):
-        self.log_base = log_base or Path(
-            "/home/rock/.openclaw/workspace/skills/skill-resource-awareness/cost_logs"
-        )
-        self.daily_dir = self.log_base / "daily"
-        self.daily_dir.mkdir(parents=True, exist_ok=True)
+    # Estimated costs per 1K tokens (USD)
+    CLOUD_COSTS = {
+        "kimi-k2.5": 0.00125,
+        "gpt-4o": 0.00375,
+        "claude-sonnet": 0.00300,
+        "llama3-70b": 0.00064,
+    }
+    
+    LOCAL_COST = 0.0  # Assumed negligible
+    
+    def __init__(self, log_dir: Optional[Path] = None):
+        self.log_dir = log_dir or Path.home() / ".openclaw/logs/costs"
+        self.log_dir.mkdir(parents=True, exist_ok=True)
         
-        self._today_usage: List[UsageRecord] = []
-        self._load_today()
-    
-    def _log_file_for_date(self, date: datetime) -> Path:
-        """Get log file path for a specific date."""
-        return self.daily_dir / f"{date.strftime('%Y-%m-%d')}.json"
-    
-    def _load_today(self):
-        """Load today's usage from disk."""
-        today_file = self._log_file_for_date(datetime.now())
-        if today_file.exists():
-            with open(today_file) as f:
-                data = json.load(f)
-                self._today_usage = [
-                    UsageRecord(**r) for r in data.get("records", [])
-                ]
-    
-    def _save_today(self):
-        """Save today's usage to disk."""
-        today_file = self._log_file_for_date(datetime.now())
-        with open(today_file, "w") as f:
-            json.dump({
-                "date": datetime.now().strftime("%Y-%m-%d"),
-                "records": [
-                    {
-                        "timestamp": r.timestamp,
-                        "backend": r.backend,
-                        "model": r.model,
-                        "input_tokens": r.input_tokens,
-                        "output_tokens": r.output_tokens,
-                        "cost_usd": r.cost_usd,
-                        "latency_ms": r.latency_ms
-                    }
-                    for r in self._today_usage
-                ]
-            }, f, indent=2)
-    
-    def calculate_cost(self, model: str, input_tokens: int, output_tokens: int) -> float:
-        """Calculate cost in USD for a request."""
-        pricing = MODEL_PRICING.get(model, {"input": 0.50, "output": 2.00})
+        self.daily_usage: Dict[str, List[UsageRecord]] = {}
+        self.local_tokens_saved = 0
+        self.cloud_tokens_used = 0
+        self.estimated_savings = 0.0
         
-        input_cost = (input_tokens / 1_000_000) * pricing["input"]
-        output_cost = (output_tokens / 1_000_000) * pricing["output"]
-        
-        return round(input_cost + output_cost, 6)
+        # New v1.4.0 metrics
+        self.routing_stats = {
+            "local_routed": 0,
+            "cloud_routed": 0,
+            "escalations": 0,
+            "local_failures": 0,
+        }
     
     def record_usage(
         self,
-        backend: str,
+        provider: str,
         model: str,
-        input_tokens: int,
-        output_tokens: int,
-        latency_ms: int
-    ) -> float:
-        """Record a request and return its cost."""
-        cost = self.calculate_cost(model, input_tokens, output_tokens)
-        
+        prompt_tokens: int,
+        completion_tokens: int,
+        wall_time_ms: int,
+        task_type: str = "unknown"
+    ) -> Dict:
+        """
+        Record usage and return metrics.
+        """
         record = UsageRecord(
             timestamp=datetime.now().isoformat(),
-            backend=backend,
+            provider=provider,
             model=model,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            cost_usd=cost,
-            latency_ms=latency_ms
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            wall_time_ms=wall_time_ms,
+            task_type=task_type,
+            estimated_cost=self._estimate_cost(model, completion_tokens)
         )
         
-        self._today_usage.append(record)
-        self._save_today()
+        # Track stats
+        day = datetime.now().strftime("%Y-%m-%d")
+        if day not in self.daily_usage:
+            self.daily_usage[day] = []
+        self.daily_usage[day].append(record)
         
-        return cost
-    
-    def get_daily_spend(self, date: Optional[datetime] = None) -> Dict:
-        """Get spend for a specific date."""
-        date = date or datetime.now()
-        log_file = self._log_file_for_date(date)
+        if provider.startswith("local"):
+            self.local_tokens_saved += completion_tokens
+        else:
+            self.cloud_tokens_used += completion_tokens
         
-        if not log_file.exists():
-            return {"date": date.strftime("%Y-%m-%d"), "total_cost": 0.0, "requests": 0}
+        # Calculate savings
+        cloud_cost = self._estimate_cost("kimi-k2.5", completion_tokens)
+        local_cost = 0.0
+        self.estimated_savings += (cloud_cost - local_cost)
         
-        with open(log_file) as f:
-            data = json.load(f)
-            records = data.get("records", [])
-            total = sum(r["cost_usd"] for r in records)
-            
-            return {
-                "date": date.strftime("%Y-%m-%d"),
-                "total_cost": round(total, 4),
-                "requests": len(records),
-                "by_model": self._aggregate_by_model(records),
-                "budget_percent": min(100, (total / DAILY_BUDGET_USD) * 100)
-            }
-    
-    def get_monthly_spend(self) -> Dict:
-        """Get current month's spend."""
-        now = datetime.now()
-        total = 0.0
-        total_requests = 0
-        
-        # Check last 31 days
-        for i in range(31):
-            date = now - timedelta(days=i)
-            log_file = self._log_file_for_date(date)
-            if log_file.exists():
-                with open(log_file) as f:
-                    data = json.load(f)
-                    records = data.get("records", [])
-                    total += sum(r["cost_usd"] for r in records)
-                    total_requests += len(records)
+        self._log_record(record)
         
         return {
-            "month": now.strftime("%Y-%m"),
-            "total_cost": round(total, 4),
-            "total_requests": total_requests,
-            "budget_percent": min(100, (total / MONTHLY_BUDGET_USD) * 100),
-            "budget_remaining": round(MONTHLY_BUDGET_USD - total, 4)
+            "tokens": completion_tokens,
+            "estimated_cost": record.estimated_cost,
+            "provider": provider,
         }
     
-    def _aggregate_by_model(self, records: List[Dict]) -> Dict[str, float]:
-        """Aggregate costs by model."""
-        by_model = {}
-        for r in records:
-            model = r["model"]
-            by_model[model] = by_model.get(model, 0.0) + r["cost_usd"]
-        return {k: round(v, 4) for k, v in by_model.items()}
+    def _estimate_cost(self, model: str, tokens: int) -> float:
+        """Estimate cost for given model and tokens."""
+        cost_per_1k = self.CLOUD_COSTS.get(model, 0.001)  # Default safe estimate
+        return (tokens / 1000) * cost_per_1k
     
-    def should_use_local(self, estimated_tokens: int = 1000) -> bool:
+    def _log_record(self, record: UsageRecord):
+        """Log record to file."""
+        log_file = self.log_dir / f"usage_{datetime.now().strftime('%Y-%m')}.jsonl"
+        with open(log_file, 'a') as f:
+            f.write(json.dumps(asdict(record)) + '\n')
+    
+    def should_use_local(self) -> Tuple[bool, str]:
         """
-        Determine if we should switch to local backend.
+        v1.4.0: Decide whether to use local model.
         
-        Returns True if:
-        - Daily budget exceeded
-        - Monthly budget at 80%+
+        Returns (should_use_local, reason)
         """
-        daily = self.get_daily_spend()
-        monthly = self.get_monthly_spend()
+        # Simple heuristic: always prefer local for eligible tasks
+        # More sophisticated logic would check:
+        # - Current usage vs budget
+        # - Time of day (local preferred overnight)
+        # - Task type
         
-        if daily["budget_percent"] >= 100:
-            return True
+        return True, "local_first_policy"
+    
+    def get_local_savings_report(self) -> Dict:
+        """
+        v1.4.0: Get estimated savings from local model usage.
+        """
+        return {
+            "local_tokens_processed": self.local_tokens_saved,
+            "cloud_tokens_processed": self.cloud_tokens_used,
+            "estimated_cloud_cost_avoided": self.estimated_savings,
+            "routing_decisions": self.routing_stats,
+            "local_percentage": self.local_tokens_saved / (self.local_tokens_saved + self.cloud_tokens_used) * 100
+            if (self.local_tokens_saved + self.cloud_tokens_used) > 0 else 0
+        }
+    
+    def get_daily_summary(self, days: int = 7) -> List[Dict]:
+        """Get daily summaries for last N days."""
+        summaries = []
+        date = datetime.now()
         
-        if monthly["budget_percent"] >= 80:
-            return True
+        for _ in range(days):
+            day_str = date.strftime("%Y-%m-%d")
+            records = self.daily_usage.get(day_str, [])
+            
+            total_tokens = sum(r.completion_tokens for r in records)
+            total_cost = sum(r.estimated_cost for r in records)
+            local_count = sum(1 for r in records if r.provider.startswith("local"))
+            cloud_count = len(records) - local_count
+            
+            summaries.append({
+                "date": day_str,
+                "total_requests": len(records),
+                "total_tokens": total_tokens,
+                "total_cost": round(total_cost, 4),
+                "local_requests": local_count,
+                "cloud_requests": cloud_count,
+            })
+            
+            date -= timedelta(days=1)
         
-        return False
+        return summaries
 
 
-# Verification test
+# Test
 if __name__ == "__main__":
-    import tempfile
+    tracker = CostTracker()
     
-    print("=" * 60)
-    print("COST TRACKER - VERIFICATION TEST")
-    print("=" * 60)
+    # Simulate usage
+    tracker.record_usage("openrouter", "kimi-k2.5", 1000, 500, 1000, "summarization")
+    tracker.record_usage("local_llama", "qwen3-8b", 500, 300, 2000, "classification")
     
-    # Setup
-    test_dir = Path(tempfile.mkdtemp())
-    print(f"\n[1] Test environment: {test_dir}")
-    
-    tracker = CostTracker(log_base=test_dir)
-    
-    # Test cost calculation
-    print("\n[2] Testing cost calculations...")
-    
-    # kimi-k2.5: 1K in, 500 out
-    cost = tracker.calculate_cost(
-        "openrouter/moonshotai/kimi-k2.5",
-        input_tokens=1000,
-        output_tokens=500
-    )
-    expected = (1000/1_000_000 * 0.50) + (500/1_000_000 * 2.00)
-    assert abs(cost - expected) < 0.0001
-    print(f"    - kimi-k2.5 (1K+500 tokens): ${cost:.6f} ✓")
-    
-    # o1-preview: expensive
-    expensive = tracker.calculate_cost(
-        "openrouter/openai/o1-preview",
-        input_tokens=10000,
-        output_tokens=5000
-    )
-    print(f"    - o1-preview (10K+5K tokens): ${expensive:.4f} ✓")
-    
-    # Local: free
-    free = tracker.calculate_cost("ollama/llama3:8b", 10000, 10000)
-    assert free == 0.0
-    print(f"    - Local model (any tokens): ${free:.4f} ✓")
-    
-    # Test usage recording
-    print("\n[3] Testing usage recording...")
-    cost1 = tracker.record_usage(
-        backend="openrouter",
-        model="openrouter/moonshotai/kimi-k2.5",
-        input_tokens=5000,
-        output_tokens=2000,
-        latency_ms=1200
-    )
-    print(f"    - Recorded request: ${cost1:.6f} ✓")
-    
-    cost2 = tracker.record_usage(
-        backend="openrouter",
-        model="openrouter/moonshotai/kimi-k2.5",
-        input_tokens=3000,
-        output_tokens=1500,
-        latency_ms=800
-    )
-    
-    # Test daily spend
-    print("\n[4] Testing daily spend query...")
-    daily = tracker.get_daily_spend()
-    assert daily["requests"] == 2
-    assert daily["total_cost"] > 0
-    print(f"    - Today's spend: ${daily['total_cost']:.4f} ✓")
-    print(f"    - Requests: {daily['requests']} ✓")
-    print(f"    - Budget used: {daily['budget_percent']:.1f}% ✓")
-    
-    # Test monthly spend
-    print("\n[5] Testing monthly spend...")
-    monthly = tracker.get_monthly_spend()
-    print(f"    - Month: {monthly['month']} ✓")
-    print(f"    - Total: ${monthly['total_cost']:.4f} ✓")
-    print(f"    - Remaining budget: ${monthly['budget_remaining']:.2f} ✓")
-    
-    # Test local fallback decision
-    print("\n[6] Testing local fallback decision...")
-    should_local = tracker.should_use_local()
-    print(f"    - Should use local: {should_local} ✓")
-    
-    print("\n" + "=" * 60)
-    print("ALL TESTS PASSED ✓")
-    print("=" * 60)
+    print("Cost tracking test:")
+    print(json.dumps(tracker.get_local_savings_report(), indent=2))

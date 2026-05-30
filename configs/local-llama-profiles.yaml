@@ -1,0 +1,135 @@
+# Local Llama Model Profiles
+# v1.4.0 - Local Intelligence & Cost Optimization
+# 
+# This file configures local llama.cpp model endpoints for the swarm.
+# Each profile targets different use cases and hardware requirements.
+#
+# IMPORTANT: Update these endpoints to match your actual llama.cpp servers.
+# Default ports assume multiple servers on rock-5c:
+#   - 8080: fast/qwen3-8b-q5
+#   - 8081: balanced/qwen3-14b-q4  
+#   - 8082: overnight/qwen3-30b-a3b-q4
+
+local_models:
+  # Fast: Quick tasks, low resource overhead
+  fast:
+    provider: llama_cpp
+    endpoint: http://192.168.4.131:8080/v1
+    model: qwen3-8b-q5
+    max_context: 4096
+    timeout: 30
+    use_for:
+      - classification          # Quick categorization
+      - routing                  # Task routing decisions
+      - short_summary            # Brief summaries (< 200 tokens)
+      - extraction               # Simple data extraction
+      - quick_sorting            # Fast priority sorting
+    description: "Fast 8B model for simple, repetitive tasks. Low latency."
+
+  # Balanced: Good quality for most tasks
+  balanced:
+    provider: llama_cpp
+    endpoint: http://192.168.4.131:8081/v1
+    model: qwen3-14b-q4
+    max_context: 4096
+    timeout: 60
+    use_for:
+      - query_rewrite            # Rewrite/expand queries
+      - medium_summary           # Standard summaries (500-1000 tokens)
+      - triage                   # Decision triage
+      - evidence_grading         # Grade evidence quality
+      - deduplication            # Find duplicates
+      - tagging                  # Content tagging
+    description: "Balanced 14B model for general tasks. Best value."
+
+  # Overnight: High quality, handles complex work
+  overnight:
+    provider: llama_cpp
+    endpoint: http://192.168.4.131:8082/v1
+    model: qwen3-30b-a3b-q4
+    max_context: 4096
+    timeout: 300
+    use_for:
+      - long_summary             # Deep summaries (>1000 tokens)
+      - report_generation        # Multi-section reports
+      - research_synthesis       # Combine multiple sources
+      - passive_code_review      # Non-blocking code analysis
+      - complex_analysis         # Multi-step reasoning
+    description: "Large 30B model for complex overnight batches. High quality."
+
+# Routing Policy
+# Defines when to use local vs cloud models
+routing_policy:
+  local_first:
+    enabled: true
+    
+    # Task types safe for local models (read-only, verifiable)
+    allowed_task_types:
+      - summarization
+      - extraction
+      - deduplication
+      - newsletter_processing
+      - price_monitoring
+      - report_draft
+      - passive_codebase_scan
+      - classification
+      - routing
+      - triage
+      - evidence_grading
+      - tagging
+      - metadata_extraction
+      - web_summary
+    
+    # Profile selection by task 
+    task_profile_mapping:
+      classification: fast
+      extraction: fast
+      short_summary: fast
+      routing: fast
+      deduplication: balanced
+      medium_summary: balanced
+      triage: balanced
+      long_summary: overnight
+      report_generation: overnight
+      research_synthesis: overnight
+      passive_code_review: overnight
+
+  # Tasks that MUST use cloud (high-risk, destructive)
+  cloud_required:
+    - credential_modification
+    - destructive_file_operation
+    - production_deploy
+    - legal_financial_final_answer
+    - high_uncertainty_final_decision
+    - email_sending
+    - purchase_execution
+    - database_write
+
+  # Escalation triggers
+  escalation:
+    # Escalate if local confidence below this
+    local_confidence_below: 0.72
+    
+    # Escalate if evidence grade below this
+    evidence_grade_below: "B"
+    
+    # Escalate after N JSON validation failures
+    json_validation_failures: 2
+    
+    # Escalate if retrieval coverage below this
+    retrieval_coverage_below: 0.65
+    
+    # Escalate if local latency exceeds this (ms)
+    latency_ms_above: 30000
+
+# Cost tracking
+# Used by skill-resource-awareness to calculate savings
+cost_comparison:
+  # Estimated cost per 1K tokens (cloud models)
+  cloud_cost_per_1k:
+    kimi-k2.5: 0.00125
+    gpt-4o: 0.00375
+    local: 0.0  # Free (electricity excluded)
+    
+  # Track savings in log files
+  log_savings: true

@@ -12,16 +12,33 @@ Turn a basic OpenClaw swarm into a reliable, intelligent, autonomous system.
 ---
 
 ### Current Status
-- **Version**: v1.3.0
-- **Production Skills: 18
-- **Total Code**: ~16,000+ lines
+- **Version**: v1.4.0
+- **Production Skills: 22
+- **Total Code**: ~20,000+ lines
 - **License**: MIT
 
 ---
 
 ## What's New
 
-### v1.3.0 — Enhanced Intelligence & Code Intelligence (LATEST)
+### v1.4.0 — Local Intelligence & Cost Optimization (LATEST)
+- **skill-local-llama-runner-v1**: Run local llama.cpp models via OpenAI-compatible API
+  - Three profiles: fast (8B), balanced (14B), overnight (30B)
+  - Health checks, memory pressure monitoring
+  - Cloud fallback on failure
+  - Structured output validation
+- **skill-structured-output-guardian-v1**: Reliable JSON from local models
+  - Pydantic schema validation
+  - Auto-retry with repair
+  - Escalation on repeated failures
+- **skill-overnight-batch-engine-v1**: Queue and process jobs overnight
+  - Checkpoint/resume support
+  - Morning digest generation
+  - Safety enforcement (read-only only)
+- **skill-hybrid-rag-v1**: Hybrid retrieval (keyword + vector)
+- **Updated existing skills** with local/cloud routing
+
+### v1.3.0 — Enhanced Intelligence & Code Intelligence
 - **skill-premortem-v1**: Counter optimism bias with structured failure analysis
   - Gary Klein-style premortem: "Assume failure, then explain why"
   - Identifies most likely failures, tail risks, hidden assumptions
